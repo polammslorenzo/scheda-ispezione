@@ -35,3 +35,35 @@ context.tipoScheda='commerciale';
 assert.equal(fields(context.analizzaRicevuta('Protocollo SUAP 123456 del 11/09/2026')).ric_scia_prot,undefined);
 assert.equal(context.mdaProtocollo.numero,'123456');
 console.log('14 casi di importazione verificati');
+
+// Struttura del modello esteso, senza dati personali del documento originale.
+const extended = `capacità ricettiva
+TOTALE complessivo posti letto della struttura
+n.
+1
+CAMERE
+[ X ] Camere
+[ ] Numero camere singole
+con bagno (n.) senza bagno (n.) totale camere (n.) Totale posti letto (n.)
+[ X ] Numero 0 1 1 2
+camere doppie
+[ ] Numero camere triple
+TOTALE camere n. TOTALE posti letto camere n.
+1 2
+UNITÀ ABITATIVE
+[ ] Unità abitative`;
+const extendedRows=context.analizzaMda(extended);
+const extendedFields=fields(extendedRows);
+assert.equal(extendedFields.ric_cam_dich,'1');
+assert.equal(extendedFields.ric_letti_dich,'2');
+assert.equal(extendedFields.ric_bagni,undefined,'Le camere senza bagno non sono il numero di bagni');
+const beds=extendedRows.find(r=>r.k==='ric_letti_dich');
+assert.equal(beds.conferma,true);
+assert.match(beds.avviso,/totale struttura 1, totale posti letto camere 2/);
+const consistent=context.analizzaMda(extended.replace('n.\n1\nCAMERE','n.\n2\nCAMERE'));
+assert.equal(consistent.find(r=>r.k==='ric_letti_dich').conferma,undefined);
+assert.equal(fields(context.analizzaMda('TOTALE complessivo posti letto della struttura\nn.\n8')).ric_letti_dich,'8');
+const multiline=fields(context.analizzaMda('TOTALE camere n.\nTOTALE posti letto camere n.\n3\n6'));
+assert.equal(multiline.ric_cam_dich,'3');
+assert.equal(multiline.ric_letti_dich,'6');
+console.log('4 casi aggiuntivi del modello esteso verificati');

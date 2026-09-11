@@ -2339,6 +2339,20 @@ function mdaCapacitaRicettiva(testo){
     const numero = coda.match(/^[\s:|=]*(\d{1,4})(?![\d.,/])/);
     if(numero && !valori[chiave(voce[1])]) valori[chiave(voce[1])] = numero[1];
   }
+  /* Il modello ricettivo esteso riporta due totali separati dalle righe
+     "con bagno / senza bagno": queste contano camere, non servizi igienici. */
+  const totali = testo.match(/TOTALE\s+camere\s*(?:\(\s*n\.?\s*\)|n\.?)?\s*[:|]?\s*TOTALE\s+posti\s+letto\s+camere\s*(?:\(\s*n\.?\s*\)|n\.?)?\s*[:|]?\s*(\d{1,4})\s+(\d{1,4})(?![\d.,/])/i);
+  const complessivo = testo.match(/TOTALE\s+complessivo\s+posti\s+letto\s+della\s+struttura\s*(?:n\.?)?\s*:?\s*(\d{1,4})(?![\d.,/])/i);
+  if(totali){
+    valori.camere = totali[1];
+    valori.letti = totali[2];
+    if(complessivo && Number(complessivo[1]) !== Number(totali[2])){
+      valori.avvisoLetti = "Da verificare: totale struttura " + complessivo[1]
+        + ", totale posti letto camere " + totali[2] + ". Conferma il valore da importare.";
+    }
+  }else if(complessivo){
+    valori.letti = complessivo[1];
+  }
   return valori;
 }
 
@@ -2477,7 +2491,11 @@ function analizzaMda(testoOriginale){
   metti("ric_superficie",superficieRic);
   metti("ric_cam_dich",capValori.camere||"");
   metti("ric_bagni",capValori.bagni||"");
-  metti("ric_letti_dich",capValori.letti||"");
+  metti("ric_letti_dich",capValori.letti||"",!!capValori.avvisoLetti);
+  if(campi.ric_letti_dich && capValori.avvisoLetti){
+    campi.ric_letti_dich.avviso = capValori.avvisoLetti;
+    campi.ric_letti_dich.conferma = true;
+  }
   metti("ric_periodo",periodoRic);
   return Object.values(campi);
 }
@@ -2836,15 +2854,16 @@ function mdaMostraRisultati(risultati,descrizione){
     riga.className = "mda-riga";
     riga.dataset.indice = indice;
     const seleziona = document.createElement("input");
-    seleziona.type="checkbox"; seleziona.checked=!occupato || uguale || r.appendi; seleziona.setAttribute("aria-label","Importa "+(MDA_ETICHETTE[r.k]||r.k));
+    seleziona.type="checkbox"; seleziona.checked=!r.conferma && (!occupato || uguale || r.appendi); seleziona.setAttribute("aria-label","Importa "+(MDA_ETICHETTE[r.k]||r.k));
     const etichetta = document.createElement("label");
     etichetta.textContent = MDA_ETICHETTE[r.k]||r.k;
     if(occupato && !uguale){
       const avviso=document.createElement("span"); avviso.className="mda-verifica";
       avviso.textContent=r.appendi ? "si aggiunge al contenuto esistente" : "già compilato: seleziona per sostituire";
       etichetta.appendChild(avviso);
-    }else if(r.verifica){
-      const avviso=document.createElement("span"); avviso.className="mda-verifica"; avviso.textContent="testo composto: verificare"; etichetta.appendChild(avviso);
+    }
+    if(r.verifica || r.avviso){
+      const avviso=document.createElement("span"); avviso.className="mda-verifica"; avviso.textContent=r.avviso || "testo composto: verificare"; etichetta.appendChild(avviso);
     }
     const valore = document.createElement("input");
     valore.type="text"; valore.value = r.value === true ? "SÌ" : r.value; valore.readOnly = r.value === true;
