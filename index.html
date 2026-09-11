@@ -32,7 +32,7 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
 .app{display:grid;grid-template-columns:minmax(360px,440px) 1fr;height:100vh}
 
 /* ══════════ MASCHERA ══════════ */
-.maschera{background:var(--m-fondo);border-right:1px solid var(--m-bordo);display:flex;flex-direction:column;min-height:0}
+.maschera{color:var(--m-testo);background:var(--m-fondo);border-right:1px solid var(--m-bordo);display:flex;flex-direction:column;min-height:0}
 .mtesta{padding:14px 16px;border-bottom:1px solid var(--m-bordo);background:var(--m-pannello)}
 .mtesta .occhiello{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--m-tenue)}
 .mtesta h1{margin:3px 0 0;font-size:15px;color:var(--m-testo);font-weight:600;letter-spacing:.01em}
@@ -128,6 +128,7 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
 .mpiede button.foto:hover{background:#684092}
 
 .allegato-editor{border:1px solid #294264;border-radius:6px;background:#0A1220;padding:9px}
+.allegato-editor strong{display:block;color:var(--m-testo);font-size:12px;margin-bottom:4px}
 .allegato-editor .allegato-stato{display:block;color:#9CB0CD;font-size:11px;line-height:1.35;margin-bottom:7px;overflow-wrap:anywhere}
 .allegato-azioni{display:flex;flex-wrap:wrap;gap:6px}
 .allegato-azioni button{border:1px solid #345073;border-radius:5px;background:#1B2C47;color:#DCE6F5;padding:6px 9px;font:10px var(--mono);cursor:pointer}
@@ -2316,6 +2317,45 @@ function mdaIndirizzoTabella(blocco){
   return {strada:"",civico:""};
 }
 
+/* Accetta sia intestazioni tabellari sia coppie etichetta/valore.
+   I valori restano associati all'ordine delle colonne, anche su più righe. */
+function mdaCapacitaRicettiva(testo){
+  const etichetta = /\b(?:(?:numero|n\s*[.°º]?)[\s:]*)?(camere|stanze|bagni|servizi\s+igienici|posti\s+letto)(?:\s+complessivi)?\b/gi;
+  const voci = [...String(testo||"").matchAll(etichetta)];
+  const valori = {};
+  const chiave = voce => /camere|stanze/i.test(voce) ? "camere" : /bagni|servizi/i.test(voce) ? "bagni" : "letti";
+  const separatori = /^[\s:;|.,–—-]*$/;
+  for(let i=0;i<voci.length;i++){
+    const gruppo = voci.slice(i,i+3);
+    if(gruppo.length === 3 && new Set(gruppo.map(v=>chiave(v[1]))).size === 3 &&
+       gruppo.slice(1).every((v,j)=>separatori.test(testo.slice(gruppo[j].index+gruppo[j][0].length,v.index)))){
+      const coda = testo.slice(gruppo[2].index+gruppo[2][0].length);
+      const numeri = coda.match(/^[\s:|]*(\d{1,4})[\s;|]+(\d{1,4})[\s;|]+(\d{1,4})(?![\d.,/])/);
+      if(numeri) gruppo.forEach((v,j)=>valori[chiave(v[1])] = numeri[j+1]);
+      i+=2; continue;
+    }
+    const voce = voci[i];
+    const coda = testo.slice(voce.index+voce[0].length,voci[i+1]?.index);
+    const numero = coda.match(/^[\s:|=]*(\d{1,4})(?![\d.,/])/);
+    if(numero && !valori[chiave(voce[1])]) valori[chiave(voce[1])] = numero[1];
+  }
+  /* Il modello ricettivo esteso riporta due totali separati dalle righe
+     "con bagno / senza bagno": queste contano camere, non servizi igienici. */
+  const totali = testo.match(/TOTALE\s+camere\s*(?:\(\s*n\.?\s*\)|n\.?)?\s*[:|]?\s*TOTALE\s+posti\s+letto\s+camere\s*(?:\(\s*n\.?\s*\)|n\.?)?\s*[:|]?\s*(\d{1,4})\s+(\d{1,4})(?![\d.,/])/i);
+  const complessivo = testo.match(/TOTALE\s+complessivo\s+posti\s+letto\s+della\s+struttura\s*(?:n\.?)?\s*:?\s*(\d{1,4})(?![\d.,/])/i);
+  if(totali){
+    valori.camere = totali[1];
+    valori.letti = totali[2];
+    if(complessivo && Number(complessivo[1]) !== Number(totali[2])){
+      valori.avvisoLetti = "Da verificare: totale struttura " + complessivo[1]
+        + ", totale posti letto camere " + totali[2] + ". Conferma il valore da importare.";
+    }
+  }else if(complessivo){
+    valori.letti = complessivo[1];
+  }
+  return valori;
+}
+
 function analizzaMda(testoOriginale){
   let testo = String(testoOriginale||"").replace(/\r/g,"").replace(/\u00a0/g," ");
   /* Nei modelli SUAP l'indirizzo impresa.italia.it può andare a capo nella cella. */
@@ -2392,8 +2432,7 @@ function analizzaMda(testoOriginale){
   const catValori = catRiga.match(/(\d+)\s+(\d+)\s+([A-Z0-9/-]+)/i) || [];
   const categoriaRic = mdaPrimo(bloccoRic,/categoria\s*\n\s*([A-Z]\s*\d{1,2})\b/i).replace(/\s+/g,"");
   const superficieRic = mdaPrimo(testo,/Superficie\s+totale\s+immobile[^\n]*\n\s*([\d.,]+)/i);
-  const capacitaRic = mdaPrimo(testo,/N\.\s*camere\s+N\.\s*bagni\s+N\.\s*posti\s+letto\s+complessivi\s*\n\s*([^\n]+)/i);
-  const capValori = capacitaRic.match(/(\d+)\s+(\d+)\s+(\d+)/) || [];
+  const capValori = mdaCapacitaRicettiva(testo);
   const periodoRic = mdaPrimo(testo,/Periodo\s+di\s+disponibilit[aà]\s*\n\s*([^\n]+)/i);
   const denominazioneRic = mdaPrimo(testo,/Denominazione[^\n]*(?:locazione\s+turistica|locazione\s+breve)[^\n]*\n\s*([^\n]+)/i);
   const primaPagina = testo.slice(0,Math.max(6000,testo.search(/\b2\s*\/\s*\d+\b/)));
@@ -2450,9 +2489,13 @@ function analizzaMda(testoOriginale){
   metti("ric_sub",catValori[3]||"");
   metti("ric_cat",categoriaRic);
   metti("ric_superficie",superficieRic);
-  metti("ric_cam_dich",capValori[1]||"");
-  metti("ric_bagni",capValori[2]||"");
-  metti("ric_letti_dich",capValori[3]||"");
+  metti("ric_cam_dich",capValori.camere||"");
+  metti("ric_bagni",capValori.bagni||"");
+  metti("ric_letti_dich",capValori.letti||"",!!capValori.avvisoLetti);
+  if(campi.ric_letti_dich && capValori.avvisoLetti){
+    campi.ric_letti_dich.avviso = capValori.avvisoLetti;
+    campi.ric_letti_dich.conferma = true;
+  }
   metti("ric_periodo",periodoRic);
   return Object.values(campi);
 }
@@ -2521,7 +2564,7 @@ function analizzaRicevuta(testoOriginale){
 
   /* Il prefisso istituzionale viene riconosciuto, ma non viene mai riportato
      nella scheda: si salvano esclusivamente numero e data. */
-  const protocollo = testo.match(/(?:Protocollo\s+(?:SUAP|SCIA)|Prot\.?\s*n\s*[°º]?)\s*[:.]?\s*(?:c[_\s-]*f839\s*\/\s*Comune[_\s-]*di[_\s-]*Napoli\s*\/\s*)?([A-Z0-9][A-Z0-9.-]{2,})\s+(?:del|data)\s*(\d{2}[\/.-]\d{2}[\/.-]\d{4})/i);
+  const protocollo = testo.match(/(?:Protocollo(?:\s+(?:SUAP|SCIA|generale))?|Prot\.?)\s*(?:(?:numero|n\s*[.°º]?)[\s:]*)?\s*[:.]?\s*(?:c[_\s-]*f839\s*\/\s*Comune[_\s-]*di[_\s-]*Napoli\s*\/\s*)?([A-Z0-9][A-Z0-9./-]*\d[A-Z0-9./-]*)\s+(?:del|(?:in\s+)?data)\s*:?\s*(\d{2}[\/.-]\d{2}[\/.-]\d{4})/i);
   if(!protocollo) return risultati;
 
   const numero = mdaPulisci(protocollo[1]);
@@ -2533,7 +2576,7 @@ function analizzaRicevuta(testoOriginale){
   ) || testo;
 
   /* Struttura ricettiva: un titolo solo, si compila direttamente. */
-  if(/locazione\s+breve\s*\/\s*turistica|struttura\s+ricettiva|affittacamere|bed\s*(?:&|and)?\s*breakfast|casa\s+vacanze|\bhotel\b/i.test(sezioneInterventi)){
+  if(tipoScheda === "ricettive" || /locazione\s+breve\s*\/\s*turistica|struttura\s+ricettiva|affittacamere|bed\s*(?:&|and)?\s*breakfast|casa\s+vacanze|\bhotel\b/i.test(sezioneInterventi)){
     aggiungiDato("ric_scia_prot",numero);
     aggiungiDato("ric_scia_del",data);
     if(/locazione\s+breve\s*\/\s*turistica/i.test(sezioneInterventi)) aggiungiDato("ric_tip_loc",true);
@@ -2811,15 +2854,16 @@ function mdaMostraRisultati(risultati,descrizione){
     riga.className = "mda-riga";
     riga.dataset.indice = indice;
     const seleziona = document.createElement("input");
-    seleziona.type="checkbox"; seleziona.checked=!occupato || uguale || r.appendi; seleziona.setAttribute("aria-label","Importa "+(MDA_ETICHETTE[r.k]||r.k));
+    seleziona.type="checkbox"; seleziona.checked=!r.conferma && (!occupato || uguale || r.appendi); seleziona.setAttribute("aria-label","Importa "+(MDA_ETICHETTE[r.k]||r.k));
     const etichetta = document.createElement("label");
     etichetta.textContent = MDA_ETICHETTE[r.k]||r.k;
     if(occupato && !uguale){
       const avviso=document.createElement("span"); avviso.className="mda-verifica";
       avviso.textContent=r.appendi ? "si aggiunge al contenuto esistente" : "già compilato: seleziona per sostituire";
       etichetta.appendChild(avviso);
-    }else if(r.verifica){
-      const avviso=document.createElement("span"); avviso.className="mda-verifica"; avviso.textContent="testo composto: verificare"; etichetta.appendChild(avviso);
+    }
+    if(r.verifica || r.avviso){
+      const avviso=document.createElement("span"); avviso.className="mda-verifica"; avviso.textContent=r.avviso || "testo composto: verificare"; etichetta.appendChild(avviso);
     }
     const valore = document.createElement("input");
     valore.type="text"; valore.value = r.value === true ? "SÌ" : r.value; valore.readOnly = r.value === true;
