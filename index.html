@@ -373,7 +373,7 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
 .cat-box .cat-titolo{background:var(--banda);border-bottom:.5px solid var(--filo);padding:1.6mm 2mm;
   font-family:var(--serif);font-weight:700;font-size:9pt;font-variant:small-caps;letter-spacing:.05em;text-align:center}
 .cat-preview{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:2mm;overflow:hidden}
-.cat-preview img{display:none;width:100%;height:100%;object-fit:contain;object-position:center;background:#fff}
+.cat-preview img{display:none;position:absolute;inset:2mm;width:calc(100% - 4mm);height:calc(100% - 4mm);object-fit:contain;object-position:center;background:#fff}
 .cat-preview.pieno img{display:block}
 .cat-preview.pieno .cat-vuoto{display:none}
 .cat-vuoto{padding:7mm;text-align:center;color:#888;font:italic 9pt var(--serif);line-height:1.5}
@@ -405,38 +405,37 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
-/* Pagina A4 piena: i margini sono incorporati nel foglio. Con margin:0 Safari
-   iOS non riserva spazio per URL, data e numero pagina, che altrimenti
-   trasformano le due facciate in quattro pagine. */
-@page{size:A4;margin:0}
+/* Safari può chiamare beforeprint mentre l'anteprima mobile è nascosta.
+   Misuriamo una copia di layout fuori schermo, con le dimensioni di stampa. */
+@media screen{
+  html.misura-stampa .scrivania{display:block!important;position:fixed;left:-10000px;top:0;width:200mm;padding:0;overflow:visible}
+  html.misura-stampa .pila{width:200mm;zoom:1!important}
+  html.misura-stampa .foglio{width:200mm;height:286mm;padding:4mm 7mm 2mm}
+  html.misura-stampa.stampa-ios .foglio{height:250mm;padding:12mm 7mm 4mm}
+}
+
+/* Una piccola riserva interna mantiene ogni facciata nell'area stampabile
+   A4 anche con i margini fisici della stampante usata da Safari su Mac. */
+@page{size:A4;margin:5mm}
 @media print{
-  html,body{width:210mm;margin:0!important;padding:0!important;background:#fff;overflow:visible;height:auto;
+  html,body{width:200mm;margin:0!important;padding:0!important;background:#fff;overflow:visible;height:auto;
     -webkit-text-size-adjust:100%!important;text-size-adjust:100%!important}
   .app{display:block;height:auto}
   .maschera,.tabmob,.mda-finestra{display:none!important}
   .scrivania{display:block!important;overflow:visible;padding:0;background:#fff;height:auto}
-  .pila{width:210mm;zoom:1!important;transform:none}
-  /* Il riquadro utile resta identico all'anteprima: 186 × 281 mm. I margini
-     fisici (12 mm laterali, 9 mm sopra e 7 mm sotto) sono ora interni alla
-     pagina, così Safari mobile non può sottrarli una seconda volta. */
-  .foglio{width:210mm;height:297mm;padding:9mm 12mm 7mm;margin:0;box-shadow:none;
+  .pila{width:200mm;zoom:1!important;transform:none}
+  .foglio{width:200mm;height:286mm;padding:4mm 7mm 2mm;margin:0;box-shadow:none;
     page-break-after:always;break-after:page;page-break-inside:avoid;break-inside:avoid-page;overflow:hidden}
-  /* In anteprima l'altezza compensata mantiene il foglio pieno dopo la scala.
-     In stampa, invece, Safari la interpreta come una seconda pagina. Il box
-     resta quindi alto esattamente una facciata: il contenuto eccedente viene
-     ridotto dal transform, ma non partecipa alla paginazione. */
-  .contenuto{height:100%!important;page-break-inside:avoid!important;break-inside:avoid-page!important}
-  /* Safari iOS conserva spesso le proprie intestazioni anche con @page margin:0.
-     Ogni facciata usa quindi l'area realmente stampabile. La scala è fissata
-     anche nel CSS di stampa: beforeprint su iOS può essere eseguito prima che
-     Safari applichi queste dimensioni e lascerebbe tagliati i blocchi finali. */
-  html.stampa-ios,html.stampa-ios body{width:200mm}
-  html.stampa-ios .pila{width:200mm}
-  html.stampa-ios .foglio{width:200mm;height:250mm;padding:12mm 7mm 4mm}
+  /* Il contenuto scalato è fuori dal flusso: Safari pagina solo il foglio,
+     senza contare una seconda volta le dimensioni precedenti al transform. */
+  .foglio>.contenuto{position:absolute;top:4mm;left:7mm;
+    width:calc(186mm / var(--f));height:calc(280mm / var(--f))!important}
+  html.stampa-ios .foglio{height:250mm;padding:12mm 7mm 4mm}
+  html.stampa-ios .foglio>.contenuto{top:12mm;height:calc(234mm / var(--f))!important}
   html.stampa-ios #pag1 .contenuto{--f:.62!important}
   html.stampa-ios #pag2 .contenuto{--f:.80!important}
   html.stampa-ios #ricPag1 .contenuto{--f:.72!important}
-  html.stampa-ios #ricPag2 .contenuto{--f:.90!important}
+  #ricPag2>.contenuto{--f:1!important}
   .foglio:last-child,.foglio.esclusa,.foglio.fine-scheda{page-break-after:auto;break-after:auto}
   .foglio.esclusa{display:none}
   .spia{display:none!important}
@@ -3279,12 +3278,18 @@ function adatta(){
     const c = f.querySelector(".contenuto");
     if(!c) return;
     c.style.setProperty("--f",1);
+    // Gli allegati occupano il riquadro disponibile senza ingrandire il layout.
+    if(f.id === "ricPag2") { f.classList.remove("stretta"); return; }
+    if(f.classList.contains("tipo-nascosto") || f.classList.contains("esclusa")) return;
     const st = getComputedStyle(f);
     const disponibile = f.clientHeight - parseFloat(st.paddingTop) - parseFloat(st.paddingBottom);
-    const memoria = c.style.height;
-    c.style.height = "auto";
-    const serve = c.offsetHeight;
-    c.style.height = memoria;
+    const memoria = c.style.getPropertyValue("height");
+    const priorita = c.style.getPropertyPriority("height");
+    // La misura deve prevalere anche sull'altezza fissata dal CSS di stampa.
+    c.style.setProperty("height","auto","important");
+    const serve = Math.max(c.offsetHeight,c.scrollHeight);
+    if(memoria) c.style.setProperty("height",memoria,priorita);
+    else c.style.removeProperty("height");
     if(!disponibile || !serve) return;
     const k = serve > disponibile ? Math.max(.62, (disponibile/serve)*0.997) : 1;
     c.style.setProperty("--f", k);
@@ -3316,7 +3321,8 @@ if(stampaSuIOS) document.documentElement.classList.add("stampa-ios");
 
 function preparaStampa(){
   pila.style.zoom = "";
-  adatta();
+  document.documentElement.classList.add("misura-stampa");
+  try{ adatta(); }finally{ document.documentElement.classList.remove("misura-stampa"); }
   if(!stampaSuIOS) return;
   document.querySelectorAll(".foglio:not(.esclusa):not(.tipo-nascosto) .contenuto").forEach(c=>{
     if(c.dataset.scalaPrimaStampa) return;
