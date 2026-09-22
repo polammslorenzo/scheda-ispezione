@@ -1879,7 +1879,9 @@ mcorpo.addEventListener("input",e=>{
 
 ["fileFotoScatto","fileFotoCarica"].forEach(id=>{
   document.getElementById(id)?.addEventListener("change",async e=>{
-    const files = e.target.files;
+    /* La FileList è un oggetto vivo: azzerare il campo la svuota sul posto.
+       Si copia prima, altrimenti le foto scelte non arrivano mai. */
+    const files = Array.from(e.target.files || []);
     e.target.value = "";
     if(sigillato) return;
     await acquisisciFoto(files);
@@ -2442,6 +2444,13 @@ function analizzaMda(testoOriginale){
     : mdaPrimo(primaPagina,/\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})\b/i).replace(/\s+/g,"");
   const ricLocazione = ricettiva && /locazione\s+breve\s*\/\s*turistica/i.test(testo.slice(0,7000));
   const titoloRic = testo.slice(0,7000);
+  /* Dati catastali, superficie, bagni compaiono anche negli MDA di bar e
+     negozi: finiscono nei campi ricettivi solo se il documento riguarda
+     davvero una struttura ricettiva o la scheda è già quella ricettiva.
+     I posti letto e la capacità ricettiva bastano come prova: un esercizio
+     commerciale non li dichiara. */
+  const datiRic = ricettiva || tipoScheda === "ricettive"
+    || !!capValori.letti || /capacit[aà]\s+ricettiva/i.test(testo);
 
   function metti(k,v,verifica){
     if(v === true || (typeof v === "string" && v.trim())) campi[k] = {k,value:v,verifica:!!verifica};
@@ -2483,19 +2492,19 @@ function analizzaMda(testoOriginale){
   metti("ric_tip_casa",ricettiva && !ricLocazione && /casa\s+vacanze/i.test(titoloRic));
   metti("ric_tip_hotel",ricettiva && !ricLocazione && /\bhotel\b/i.test(titoloRic));
   metti("ric_scia_del",ricettiva ? dataPratica : "");
-  metti("ric_foglio",catValori[1]||"");
-  metti("ric_part",catValori[2]||"");
-  metti("ric_sub",catValori[3]||"");
-  metti("ric_cat",categoriaRic);
-  metti("ric_superficie",superficieRic);
-  metti("ric_cam_dich",capValori.camere||"");
-  metti("ric_bagni",capValori.bagni||"");
-  metti("ric_letti_dich",capValori.letti||"",!!capValori.avvisoLetti);
+  metti("ric_foglio",datiRic ? catValori[1]||"" : "");
+  metti("ric_part",datiRic ? catValori[2]||"" : "");
+  metti("ric_sub",datiRic ? catValori[3]||"" : "");
+  metti("ric_cat",datiRic ? categoriaRic : "");
+  metti("ric_superficie",datiRic ? superficieRic : "");
+  metti("ric_cam_dich",datiRic ? capValori.camere||"" : "");
+  metti("ric_bagni",datiRic ? capValori.bagni||"" : "");
+  metti("ric_letti_dich",datiRic ? capValori.letti||"" : "",!!capValori.avvisoLetti);
   if(campi.ric_letti_dich && capValori.avvisoLetti){
     campi.ric_letti_dich.avviso = capValori.avvisoLetti;
     campi.ric_letti_dich.conferma = true;
   }
-  metti("ric_periodo",periodoRic);
+  metti("ric_periodo",datiRic ? periodoRic : "");
   return Object.values(campi);
 }
 
@@ -2572,17 +2581,22 @@ function analizzaRicevuta(testoOriginale){
     testo,
     /8\s*[-–—]?\s*Interventi\s+attivati/i,
     /9\s*[-–—]?\s*Elenco\s+dei\s+documenti/i
-  ) || testo;
+  );
 
-  /* Struttura ricettiva: un titolo solo, si compila direttamente. */
+  /* Struttura ricettiva: un titolo solo, si compila direttamente. La
+     tipologia si riconosce solo negli interventi attivati: cercata in tutto
+     il documento, una parola come "hotel" in un indirizzo o nell'elenco dei
+     procedimenti trasformava in ricettiva la ricevuta di un bar. */
   if(tipoScheda === "ricettive" || /locazione\s+breve\s*\/\s*turistica|struttura\s+ricettiva|affittacamere|bed\s*(?:&|and)?\s*breakfast|casa\s+vacanze|\bhotel\b/i.test(sezioneInterventi)){
+    const interventiRic = sezioneInterventi || testo;
     aggiungiDato("ric_scia_prot",numero);
     aggiungiDato("ric_scia_del",data);
-    if(/locazione\s+breve\s*\/\s*turistica/i.test(sezioneInterventi)) aggiungiDato("ric_tip_loc",true);
-    else if(/affittacamere/i.test(sezioneInterventi)) aggiungiDato("ric_tip_aff",true);
-    else if(/bed\s*(?:&|and)?\s*breakfast|\bB\s*&\s*B\b/i.test(sezioneInterventi)) aggiungiDato("ric_tip_bb",true);
-    else if(/casa\s+vacanze/i.test(sezioneInterventi)) aggiungiDato("ric_tip_casa",true);
-    else if(/\bhotel\b/i.test(sezioneInterventi)) aggiungiDato("ric_tip_hotel",true);
+    if(/locazione\s+breve\s*\/\s*turistica/i.test(interventiRic)) aggiungiDato("ric_tip_loc",true);
+    else if(/affittacamere/i.test(interventiRic)) aggiungiDato("ric_tip_aff",true);
+    else if(/bed\s*(?:&|and)?\s*breakfast|\bB\s*&\s*B\b/i.test(interventiRic)) aggiungiDato("ric_tip_bb",true);
+    else if(/casa\s+vacanze/i.test(interventiRic)) aggiungiDato("ric_tip_casa",true);
+    else if(/\bhotel\b/i.test(interventiRic)) aggiungiDato("ric_tip_hotel",true);
+    return risultati;
   }
 
   /* Attività commerciali: il protocollo non viene assegnato d'ufficio a un
@@ -2593,7 +2607,7 @@ function analizzaRicevuta(testoOriginale){
     numero, data,
     riferimento: numero+" del "+data,
     pratica: pratica || "",
-    rilevati: titoliNelTesto(sezioneInterventi)
+    rilevati: titoliNelTesto(sezioneInterventi || testo)
   };
   return risultati;
 }
@@ -2842,7 +2856,6 @@ function mdaMostraProtocollo(){
 }
 
 function mdaMostraRisultati(risultati,descrizione){
-  if(risultati.some(r=>/^ric_/.test(r.k))) impostaTipoScheda("ricettive",false);
   mdaRiconosciuti = risultati;
   mdaRisultati.innerHTML = "";
   risultati.forEach((r,indice)=>{
@@ -3010,10 +3023,16 @@ mdaApplica.addEventListener("click",()=>{
     const attivo=f.find(k=>scelti[k]===true);
     if(attivo) f.forEach(k=>{ if(k!==attivo) scelti[k]=false; });
   });
+  /* La scheda passa alle ricettive solo se l'operatore applica dati
+     ricettivi, non alla sola lettura: annullando, resta com'era. */
+  const passaARicettive = tipoScheda !== "ricettive"
+    && Object.keys(scelti).some(k=>/^ric_/.test(k) && scelti[k] !== false);
+  if(passaARicettive) impostaTipoScheda("ricettive",false);
   applica({campi:scelti});
   const nomeImportazione = mdaTipoDocumento === "foto" ? "Foto SCIA" : (mdaTipoDocumento === "ricevuta" ? "Ricevuta SUAP" : "MDA");
   nota(nomeImportazione+" importata: "+Object.keys(scelti).filter(k=>scelti[k]!==false).length+" campi compilati"
     +(titoliAssegnati ? ", protocollo assegnato a "+titoliAssegnati+(titoliAssegnati===1?" titolo":" titoli") : "")
+    +(passaARicettive ? ". Il documento riguarda una struttura ricettiva: scheda passata ad Attività ricettive" : "")
     +". Verifica i dati prima di sigillare.",true);
   mdaChiudi(); ricalcola();
 });
