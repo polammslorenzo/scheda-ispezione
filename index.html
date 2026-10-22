@@ -507,6 +507,10 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
   html.stampa-ios #pag2 .contenuto{--f:.83!important}
   html.stampa-ios #ricPag1 .contenuto{--f:.925!important}
   #ricPag2>.contenuto{--f:1!important}
+  /* Chrome impagina con la larghezza precedente al transform e rimpicciolisce
+     tutto il documento: con zoom la larghezza occupata è quella ridotta. */
+  html.stampa-chromium .foglio>.contenuto{transform:none;zoom:var(--f);
+    top:calc(4mm / var(--f));left:calc(7mm / var(--f))}
   .foglio:last-child,.foglio.esclusa,.foglio.fine-scheda{page-break-after:auto;break-after:auto}
   .foglio.esclusa{display:none}
   .spia{display:none!important}
@@ -3420,6 +3424,9 @@ componiFormula();
 const stampaSuIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent)
   || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 if(stampaSuIOS) document.documentElement.classList.add("stampa-ios");
+// Solo Chrome/Edge desktop: Chrome su iPhone è WebKit e dichiara CriOS.
+const stampaChromium = !stampaSuIOS && /(Chrome|Chromium|Edg)\//.test(navigator.userAgent);
+if(stampaChromium) document.documentElement.classList.add("stampa-chromium");
 
 function preparaStampa(){
   pila.style.zoom = "";
