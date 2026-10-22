@@ -1294,8 +1294,8 @@ SEZIONI.forEach((sez,idx)=>{
     f.className = "f";
     const idCampo = "campo"+(++contatoreCampi);
     const controllo = c.area
-      ? '<textarea id="'+idCampo+'" data-k="'+c.k+'" rows="'+c.area+'"></textarea>'
-      : '<input id="'+idCampo+'" type="text" data-k="'+c.k+'">';
+      ? '<textarea id="'+idCampo+'" data-k="'+c.k+'" rows="'+c.area+'" autocapitalize="characters"></textarea>'
+      : '<input id="'+idCampo+'" type="text" data-k="'+c.k+'" autocapitalize="characters">';
     f.innerHTML = '<label for="'+idCampo+'">'+c.l+'</label>'+controllo;
     if(c.w === 2){ scarica(); corpo.appendChild(f); }
     else { buffer.push(f); if(buffer.length===3) scarica(); }
@@ -1305,6 +1305,35 @@ SEZIONI.forEach((sez,idx)=>{
   g.appendChild(testa); g.appendChild(corpo);
   mcorpo.appendChild(g);
 });
+
+/* ── stampatello: tutto ciò che si scrive nella scheda è maiuscolo ──
+   Si trasforma il valore, non solo l'aspetto: maiuscolo è anche nel JSON,
+   nella ricevuta, nella lettura automatica e nel PDF. Restano come sono i
+   dati interni (immagini, nomi dei file, impronte), che iniziano con "__". */
+function maiuscolo(v){ return typeof v === "string" ? v.toLocaleUpperCase("it-IT") : v; }
+function inMaiuscolo(el){
+  const valore = el.value, alto = maiuscolo(valore);
+  if(valore === alto) return;
+  /* il cursore resta dov'era anche se una lettera si allunga (ß → SS) */
+  const posizione = n => n == null ? null : maiuscolo(valore.slice(0,n)).length;
+  const inizio = posizione(el.selectionStart), fine = posizione(el.selectionEnd);
+  el.value = alto;
+  if(inizio != null && el.ownerDocument.activeElement === el){
+    try{ el.setSelectionRange(inizio,fine); }catch(e){}
+  }
+}
+function campiInMaiuscolo(campi){
+  const fuori = {};
+  Object.entries(campi || {}).forEach(([k,v])=>{
+    if(k === "__foto" && Array.isArray(v)){
+      fuori[k] = v.map(f=>f && typeof f === "object" && typeof f.didascalia === "string"
+        ? {...f, didascalia:maiuscolo(f.didascalia)} : f);
+    }else{
+      fuori[k] = k.startsWith("__") ? v : maiuscolo(v);
+    }
+  });
+  return fuori;
+}
 
 /* ── legatura maschera ⇄ foglio ── */
 function dipingi(k){
@@ -1370,7 +1399,10 @@ document.querySelectorAll('.tipo-tabs [data-tipo-scheda]').forEach(btn=>{
 mcorpo.addEventListener("input",e=>{
   const k = e.target.dataset.k;
   if(!k) return;
-  dati[k] = e.target.value;
+  /* durante la composizione (dettatura, tastiere predittive) il testo si
+     sistema a composizione chiusa: toccarlo prima la interromperebbe */
+  if(!e.isComposing) inMaiuscolo(e.target);
+  dati[k] = maiuscolo(e.target.value);
   sincronizzaControlli(k,e.target);
   dipingi(k); componiAgenti(); componiFormula(); aggiornaConteggio();
 });
@@ -1389,6 +1421,9 @@ mcorpo.addEventListener("change",e=>{
     });
   }
   dipingi(k); componiAgenti(); componiFormula(); aggiornaConteggio();
+});
+mcorpo.addEventListener("compositionend",e=>{
+  if(e.target.matches?.("[data-k],[data-foto-didascalia]")) inMaiuscolo(e.target);
 });
 mcorpo.addEventListener("focusin",e=>{ if(e.target.dataset.k) evidenzia(e.target.dataset.k,true); });
 mcorpo.addEventListener("focusout",e=>{ if(e.target.dataset.k) evidenzia(e.target.dataset.k,false); });
@@ -1780,6 +1815,7 @@ function costruisciElencoFoto(){
       meta.textContent = "N. "+(i+1)+" · "+f.quando+" · "+f.nome;
       const dida = document.createElement("input");
       dida.type = "text";
+      dida.autocapitalize = "characters";
       dida.placeholder = "Didascalia — es. scontrino fiscale, insegna, timbro";
       dida.value = f.didascalia || "";
       dida.dataset.fotoDidascalia = f.id;
@@ -1906,7 +1942,8 @@ mcorpo.addEventListener("input",e=>{
   if(!dida) return;
   const f = elencoFoto().find(x=>x.id === dida.dataset.fotoDidascalia);
   if(!f) return;
-  f.didascalia = dida.value;
+  if(!e.isComposing) inMaiuscolo(dida);
+  f.didascalia = maiuscolo(dida.value);
   costruisciPagineFoto();
 });
 
@@ -2144,7 +2181,7 @@ function recordRegistroDaScheda(c,idScheda,tipoAttivo=tipoScheda){
 }
 let sigillo = null;
 function pacchetto(){
-  const campi={...dati};
+  const campi=sigillato ? {...dati} : campiInMaiuscolo(dati);
   const idScheda=idSchedaRegistro(campi);
   return {
     formato:"scheda-ispezione-san-lorenzo",
@@ -2162,7 +2199,8 @@ function pacchetto(){
 function applica(p){
   if(sigillato){ nota("La scheda è sigillata: non è più modificabile"); return; }
   if(p.tipoScheda) impostaTipoScheda(p.tipoScheda,false);
-  Object.entries(p.campi || {}).forEach(([k,v])=>{
+  const campi = p.sigillo ? (p.campi || {}) : campiInMaiuscolo(p.campi);
+  Object.entries(campi).forEach(([k,v])=>{
     dati[k] = v;
     mcorpo.querySelectorAll('[data-k="'+k+'"]').forEach(el=>{
       if(el.type === "checkbox") el.checked = !!v; else el.value = v;
@@ -2912,7 +2950,7 @@ function mdaMostraRisultati(risultati,descrizione){
       const avviso=document.createElement("span"); avviso.className="mda-verifica"; avviso.textContent=r.avviso || "testo composto: verificare"; etichetta.appendChild(avviso);
     }
     const valore = document.createElement("input");
-    valore.type="text"; valore.value = r.value === true ? "SÌ" : r.value; valore.readOnly = r.value === true;
+    valore.type="text"; valore.value = r.value === true ? "SÌ" : maiuscolo(r.value); valore.readOnly = r.value === true;
     riga.append(seleziona,etichetta,valore); mdaRisultati.appendChild(riga);
   });
   const conProtocollo = mdaMostraProtocollo();
@@ -3256,7 +3294,7 @@ function bozzaCorrente(){
   let allegati = false;
   Object.keys(dati).forEach(k=>{
     if(/^__(?:allegato_|foto$)/.test(k)){ allegati = true; return; }
-    campi[k] = dati[k];
+    campi[k] = maiuscolo(dati[k]);
   });
   return {
     v:1, tipoScheda, allegati,
