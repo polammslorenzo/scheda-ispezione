@@ -223,7 +223,7 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
 .foglio{
   width:210mm;height:297mm;margin:0 auto 16px;background:var(--carta);
   padding:9mm 12mm 7mm;color:var(--inch);
-  font-family:var(--serif);font-size:9.6pt;line-height:1.28;
+  font-size:9px;line-height:1.3;
   box-shadow:0 12px 30px rgba(0,0,0,.35);
   overflow:hidden;position:relative;
 }
@@ -239,166 +239,203 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
   background:#fff;display:none;
 }
 .foglio.stretta .spia{display:block}
-.opzionale{
-  display:inline-block;vertical-align:.9mm;margin-left:3mm;
-  font-family:var(--sans);font-size:7.4pt;font-weight:400;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--grigio);
-  border:.5px solid var(--filo);border-radius:2px;padding:.5mm 1.6mm;
-  print-color-adjust:exact;-webkit-print-color-adjust:exact;
-}
 .foglio.esclusa{opacity:.4}
 
-/* testata istituzionale ripresa dal DOCX */
-.testata{display:grid;grid-template-columns:16mm 1fr 16mm;align-items:center;gap:4mm;min-height:17mm}
-.testata img{display:block;max-width:100%;max-height:15mm;margin:auto;object-fit:contain}
-.testata .centro{grid-column:2;grid-row:1;text-align:center;font-family:Calibri,"Helvetica Neue",Arial,sans-serif;line-height:1.08}
-.testata .ente{font-weight:700;font-size:6.5pt;letter-spacing:.34em;color:#156082;white-space:nowrap}
-.testata .area{font-weight:700;font-size:10pt;color:#156082;margin-top:1.1mm}
-.testata .servizio{font-size:8pt;color:#111;margin-top:.7mm}
-.testata .unita{font-size:7.5pt;font-style:italic;color:#6E6E73;margin-top:.8mm}
+/* ══════════ FOGLI STAMPATI · stile "B · Griglia tecnica" ══════════
+   Ogni sezione è una griglia: filetto nero di 2px in testa, righe
+   separate da filetti chiari, filetto nero di 1px in chiusura. Le misure
+   dei fogli fitti (verbali) e di quelli ariosi (retro, catasto, foto)
+   stanno nelle variabili qui sotto. */
+.foglio{
+  --lb:7.5px; --tx:9px; --val:9px; --st:8px; --sn:8.5px; --art:7px;
+  --riga:4.5mm; --testa:4.3mm; --passo:5.2mm; --firma:18.6mm; --stacco:.75mm;
+  --h-ente:7.5px; --h-area:13px; --h-serv:9px; --h-unita:8.5px;
+  --tit:23px; --sottotit:10px;
+  --g-inch:#111111; --g-filo:#D1D5DB; --g-eti:#5B6472; --g-bronzo:#9A7B45; --g-rosso:#B42318;
+  --g-tenue:#6B7280; --g-recapiti:#3F4652;
+  --plex:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --plex-c:"IBM Plex Sans Condensed","IBM Plex Sans","Arial Narrow",sans-serif;
+  --plex-m:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-family:var(--plex);
+}
+#ricPag1{--riga:5.3mm}
+#pag2,#ricPag2,.pagina-foto{
+  --lb:8px; --tx:10px; --val:10px; --st:8.5px; --sn:9px;
+  --riga:7.4mm; --testa:4.8mm; --passo:6mm; --firma:23mm; --stacco:1.3mm;
+  --h-ente:8.5px; --h-area:15px; --h-serv:10.5px; --h-unita:9.5px;
+  --tit:26px; --sottotit:10.5px;
+}
+
+/* testata: fregio P.M. e stemma affiancati, filetto verticale, quattro righi */
+.testata{display:grid;grid-template-columns:auto auto 1fr;align-items:center;column-gap:3.6mm;min-height:12mm}
+.testata img{display:block;max-height:12mm;max-width:16mm;object-fit:contain}
+.testata img:first-child{order:1}
+.testata img:last-child{order:2}
+.testata .centro{order:3;border-left:1px solid var(--g-inch);padding:.2mm 0 .2mm 3.8mm;text-align:left;line-height:1.12}
+.testata .ente{font:500 var(--h-ente) var(--plex-m);letter-spacing:.3em;color:var(--g-inch);white-space:nowrap}
+.testata .area{font:700 var(--h-area) var(--plex);color:var(--g-inch);margin-top:.35mm}
+.testata .servizio{font:400 var(--h-serv) var(--plex);color:var(--g-inch);margin-top:.2mm}
+.testata .unita{font:italic 400 var(--h-unita) var(--plex);color:var(--g-eti);margin-top:.2mm}
 .doppiofilo{display:none}
+#pag2 .doppiofilo,#ricPag2 .doppiofilo{display:block;border-top:2px solid var(--g-inch);margin-top:4.2mm}
 
-/* fascia denominazione */
-.fascia{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:1.6mm}
-.fascia .cella{padding:0 4mm 1.5mm 0}
-.fascia .cella+.cella{border-left:.5px solid var(--filo);padding-left:4mm}
-.fascia .voce{font-family:var(--serif);font-weight:700;font-size:8.4pt;font-variant:small-caps;letter-spacing:.04em}
-.fascia .linea{border-bottom:.5px solid var(--filo);min-height:5.2mm;padding-top:1.2mm;font-size:10.6pt;text-transform:uppercase}
+/* denominazione e partita IVA: una riga-tabella fra due filetti neri */
+.fascia{display:grid;grid-template-columns:122.5fr 63.5fr;margin-top:2.8mm;
+  border-top:2px solid var(--g-inch);border-bottom:1px solid var(--g-inch);min-height:8.5mm}
+.fascia .cella{padding:.7mm 1.5mm .6mm 0;min-width:0}
+.fascia .cella+.cella{border-left:1px solid var(--g-filo);padding-left:1.6mm}
+.fascia .voce{font:600 8px/1.2 var(--plex-c);letter-spacing:.04em;text-transform:uppercase;color:var(--g-inch)}
+.fascia .linea{font:600 10.5px/1.25 var(--plex);text-transform:uppercase;color:var(--g-inch);margin-top:.5mm;overflow-wrap:anywhere}
+.fascia .linea:empty::after{content:"\00a0"}
 
-/* titolo */
-.titolone{font-family:var(--sans);font-weight:700;font-size:17pt;letter-spacing:-.01em;margin-top:3.5mm}
-.titolino{font-family:var(--sans);font-size:10.5pt;color:var(--grigio);margin-top:.5mm}
-.norma{font-family:var(--sans);font-style:italic;font-size:6.8pt;color:var(--grigio);margin-top:.3mm}
+/* titolo a sinistra, sottotitolo e norma a destra */
+.titolo-riga{display:flex;align-items:flex-end;justify-content:space-between;gap:6mm;margin-top:2.6mm}
+.titolone{font:600 var(--tit)/1.12 var(--plex);letter-spacing:-.01em;color:var(--g-inch)}
+.titolo-dx{text-align:right;padding-bottom:.6mm}
+.titolino{font:500 var(--sottotit)/1.3 var(--plex);color:var(--g-inch)}
+.titolino.sotto{font-weight:400;color:var(--g-recapiti);margin-top:1.4mm}
+.norma{font:400 7.5px/1.3 var(--plex-m);color:var(--g-eti);margin-top:.4mm}
+.opzionale{display:inline-block;background:var(--g-inch);color:#fff;font:600 9px/1 var(--plex-m);
+  letter-spacing:.3em;text-transform:uppercase;padding:1.3mm 1.4mm 1.2mm 2.4mm;margin-bottom:1mm;
+  print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pagina-foto .titolone{margin-top:4mm}
+.pagina-foto .titolino{font-weight:400;color:var(--g-recapiti);margin-top:1mm}
 
-/* bande di sezione */
-.banda{
-  background:var(--banda);padding:1.1mm 2mm;margin-top:1.8mm;
-  font-family:var(--serif);font-weight:700;font-size:8.6pt;
-  font-variant:small-caps;letter-spacing:.05em;
-}
-.banda .art{font-size:7.4pt;font-variant:normal;letter-spacing:.02em}
-.duebande{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:1.8mm}
-.duebande .banda{margin-top:0}
-.duebande .banda:first-child{border-right:2px solid #fff}
-.duecol{display:grid;grid-template-columns:1fr 1fr;gap:0}
-.duecol .col{padding:1.2mm 0 0}
-.duecol .col:first-child{padding-right:4mm}
-.duecol .col:last-child{border-left:.5px solid var(--filo);padding-left:4mm}
+/* sezioni */
+.sez{border-top:2px solid var(--g-inch);border-bottom:1px solid var(--g-inch);margin-top:var(--stacco);
+  display:flex;flex-direction:column;min-width:0}
+.sez.aperta{border-bottom:0}
+.sez-testa{display:flex;align-items:center;gap:1.5mm;min-height:var(--testa);border-bottom:1px solid var(--g-filo);
+  font:700 var(--st)/1 var(--plex);letter-spacing:.09em;text-transform:uppercase;color:var(--g-inch)}
+.sez-testa .num{font:600 var(--sn)/1 var(--plex-m);letter-spacing:0;color:var(--g-bronzo);min-width:3.2mm}
+.sez-testa .art{margin-left:auto;font:400 var(--art)/1 var(--plex-m);letter-spacing:0;text-transform:none;color:var(--g-tenue)}
+.coppia{display:grid;grid-template-columns:1fr 1fr;column-gap:3.7mm;margin-top:var(--stacco)}
+.coppia>.sez{margin-top:0}
+.coppia>.sez>:last-child{flex:1 1 auto}
 
-.corpo{padding:1.2mm 0 .4mm}
-.rig{margin-bottom:1.1mm;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 1.5mm}
-.lb{white-space:nowrap;font-size:9.1pt;color:#3C3C3C}
-.lb b{font-weight:700;color:var(--inch)}
-
-/* campo compilato */
-.v{
-  flex:1 1 auto;min-width:14mm;
-  border-bottom:.5px solid var(--filo);
-  padding:0 1mm .3mm;min-height:3.6mm;
-  font-family:var(--serif);font-size:10.2pt;color:var(--inch);
-}
-.v.caps{text-transform:uppercase;letter-spacing:.005em}
-.v.corta{flex:0 0 16mm}
-.v.media{flex:0 0 30mm}
-.v.mini{flex:0 0 10mm}
-.v.lunga{flex:2 1 38mm;min-width:26mm}
-.v.cortissima{flex:0 0 9mm;min-width:9mm}
-/* quote proporzionali: si spartiscono lo spazio libero della riga */
-.v.p1{flex:1 1 0}
-.v.p2{flex:2 1 0}
-.v.p3{flex:3 1 0}
+/* righe e celle */
+.riga{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;min-height:var(--riga);border-bottom:1px solid var(--g-filo)}
+.sez>.riga:last-child,.sez>.blocco:last-child{border-bottom:0}
+.c{display:flex;align-items:baseline;column-gap:1.5mm;min-width:0;
+  padding:.7mm 1.5mm .5mm;border-left:1px solid var(--g-filo)}
+.c:first-child{border-left:0;padding-left:0}
+.riga.alta{min-height:8.2mm}
+.c.centrata{align-items:center}
+.lb{font:500 var(--lb)/1.3 var(--plex-c);letter-spacing:.04em;text-transform:uppercase;color:var(--g-eti);white-space:nowrap}
+.lb b{font-weight:600;color:var(--g-inch)}
+.lb.nero{font-weight:600;color:var(--g-inch)}
+.v{flex:1 1 0;min-width:0;font:500 var(--val)/1.3 var(--plex);color:var(--g-inch);
+  text-transform:uppercase;overflow-wrap:anywhere}
+.v.caps{text-transform:uppercase}
 .v:empty::after{content:"\00a0"}
-.v.attivo{background:#FFF7CC}
+.v.attivo,.blocco.attivo,.linea.attivo{background:#FFF7CC}
+.testo{font:400 var(--tx)/1.3 var(--plex);color:var(--g-inch);white-space:nowrap}
 
-/* caselle */
-.cb{
-  width:2.9mm;height:2.9mm;border:.6px solid var(--inch);display:inline-block;
-  position:relative;margin-right:1mm;vertical-align:-.3mm;
-  print-color-adjust:exact;-webkit-print-color-adjust:exact;
-}
+/* caselle di spunta: quadrato di 9px, bordo nero, X nera quando spuntata */
+.cb{width:2.4mm;height:2.4mm;border:1.2px solid var(--g-inch);display:inline-block;flex:none;
+  position:relative;vertical-align:-.35mm;margin-right:1.2mm;background:#fff;
+  print-color-adjust:exact;-webkit-print-color-adjust:exact}
 .cb.on::after{
-  content:"";position:absolute;inset:.35mm;
+  content:"";position:absolute;inset:.2mm;
   background:
-    linear-gradient(to bottom right,transparent 42%,var(--inch) 42%,var(--inch) 58%,transparent 58%),
-    linear-gradient(to bottom left,transparent 42%,var(--inch) 42%,var(--inch) 58%,transparent 58%);
+    linear-gradient(to bottom right,transparent 40%,var(--g-inch) 40%,var(--g-inch) 60%,transparent 60%),
+    linear-gradient(to bottom left,transparent 40%,var(--g-inch) 40%,var(--g-inch) 60%,transparent 60%);
 }
-.op{white-space:nowrap;margin-right:3mm;display:inline-block}
-.op b{font-weight:700}
-.rosso{color:var(--rosso);font-weight:700}
+.opz{align-items:center;column-gap:0}
+.op{display:inline-flex;align-items:center;white-space:nowrap;margin-right:3.6mm;
+  font:400 var(--tx)/1.2 var(--plex);color:var(--g-inch)}
+.c:has(.op){align-items:center;padding-top:.3mm;padding-bottom:.3mm}
+.op b{font-weight:600}
+.op.ko .cb{border-color:var(--g-rosso)}
+.rosso{color:var(--g-rosso);font-weight:600}
+.op .lb{margin-right:1.6mm}
 
-/* blocchi liberi */
-.blocco{min-height:10mm;padding:1.2mm 1mm;white-space:pre-wrap;font-size:10pt;line-height:1.5}
-.righe{background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 5.2mm,var(--filo) 5.2mm,var(--filo) 5.25mm);}
+/* testo libero: righe vuote della griglia */
+.blocco{white-space:pre-wrap;overflow-wrap:anywhere;font:500 var(--val)/var(--passo) var(--plex);
+  text-transform:uppercase;color:var(--g-inch);min-height:calc(var(--righe,1) * var(--passo))}
+.righe{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='100' preserveAspectRatio='none'%3E%3Crect y='99' width='10' height='1' fill='%23D1D5DB'/%3E%3C/svg%3E");
+  background-size:100% var(--passo);background-repeat:repeat}
+.formula{padding:1.2mm 0 .6mm;font:400 var(--tx)/1.45 var(--plex);color:var(--g-inch);min-height:8mm}
+.formula:empty::after{content:"\00a0"}
+.formula .segno{font:400 7.5px/1.3 var(--plex-m);color:var(--g-eti);display:block;margin-top:.9mm}
 
-/* firme */
-.firme{display:grid;grid-template-columns:repeat(var(--n,2),1fr);gap:6mm;margin-top:2mm;padding-bottom:2mm}
-.firme .slot{display:flex;flex-direction:column;text-align:center}
+/* firme: riquadri a filo nero */
+.firme{display:grid;grid-template-columns:repeat(var(--n,2),1fr);column-gap:3.8mm;margin-top:1.6mm}
+.firme .slot{position:relative;display:flex;flex-direction:column;border:1px solid var(--g-inch);
+  height:var(--firma);padding:1.3mm 1.8mm;min-width:0}
 .firme .slot.vuoto{display:none}
-.firme .et{font-family:var(--serif);font-weight:700;font-size:8.6pt;font-variant:small-caps;letter-spacing:.04em;margin-bottom:1mm}
-.qual{font-family:var(--serif);font-size:8.4pt;text-transform:uppercase;line-height:1.32;margin-top:.9mm;min-height:6mm}
-.qual .matr{text-transform:none;font-family:var(--mono);font-size:6.8pt;letter-spacing:.06em;color:var(--grigio);display:block;margin-top:.3mm}
-.rigafirma{border-bottom:.5px solid var(--inch);height:13mm}
-.formula{
-  padding:1.5mm 0 .5mm;font-size:9.4pt;line-height:1.42;min-height:8mm;
-}
-.formula:empty::after{content:"\00a0";}
-.formula .segno{font-family:var(--mono);font-size:6.2pt;letter-spacing:.06em;color:var(--grigio);display:block;margin-top:1mm}
+.firme .slot::after{content:"firma";position:absolute;right:1.8mm;bottom:1.2mm;
+  font:500 6.5px/1 var(--plex-c);letter-spacing:.05em;text-transform:uppercase;color:var(--g-eti)}
+.firme .et{font:600 var(--lb)/1.2 var(--plex-c);letter-spacing:.04em;text-transform:uppercase;color:var(--g-inch)}
+.firme .rigafirma{display:none}
+.qual{font:500 var(--lb)/1.3 var(--plex);text-transform:uppercase;color:var(--g-inch);margin-top:.8mm;padding-right:10mm}
+.qual .matr{font:400 6.5px/1.3 var(--plex-m);letter-spacing:.04em;color:var(--g-eti);display:block;margin-top:.2mm}
+.chiusa{margin-top:var(--stacco)}
+#pag2 .titolino.sotto{margin-bottom:2.9mm}
+#pag2 .chiusa{margin-top:3.4mm}
+#pag2 .firme{margin-top:3mm}
 
-/* piè di pagina istituzionale ripreso dal DOCX */
-.sigillo{
-  margin-top:auto;padding-top:1.5mm;border-top:.5px solid #B8B8B8;
-  color:#777;font-family:Cambria,"Times New Roman",serif;font-size:6.8pt;
-  font-style:italic;line-height:1.2;position:relative;
-}
-.sigillo .integrita{position:static;display:flex;justify-content:flex-end;gap:2mm;min-height:3mm;margin-bottom:.8mm;
-  font-family:var(--mono);font-size:4.7pt;font-style:normal;line-height:1.25;letter-spacing:.02em;color:#999}
-.sigillo .integrita>span:first-child{display:none}
-.sigillo .impr{word-break:break-all;text-align:right;max-width:108mm}
+/* piè di pagina: marchio, recapiti, cartellino del sigillo, riga mono */
+.sigillo{margin-top:auto;border-top:2px solid var(--g-inch);padding-top:1.2mm;font-family:var(--plex);position:relative}
+.sigillo .piede{display:flex;align-items:center;gap:2.6mm}
+.sigillo .marchio{width:7.4mm;height:6.8mm;flex:none}
+.sigillo .recapiti{flex:1 1 auto;min-width:0;font:400 7.5px/1.4 var(--plex);color:var(--g-recapiti)}
 .sigillo .contatti{display:block;white-space:nowrap}
+.sigillo .integrita{display:flex;justify-content:flex-end;align-items:flex-start;flex:none;max-width:82mm}
+.sigillo .integrita>span:first-child{display:none}
+.sigillo .impr{border:1px solid var(--g-inch);padding:.55mm 1.8mm;font:500 7px/1.3 var(--plex-m);
+  color:var(--g-inch);text-align:center;overflow-wrap:anywhere}
+.sigillo .modello{margin-top:1.3mm;font:400 7px/1.3 var(--plex-m);color:var(--g-eti)}
+.pagina-foto .sigillo .integrita{max-width:none}
+
+/* zona a lettura automatica: la rilegge il Registro Controlli */
+.blocco-macchina{margin-top:1mm;font:400 5px/1.25 var(--plex-m);color:var(--g-tenue);word-break:break-all;max-height:9mm;overflow:hidden}
+.blocco-macchina:empty{display:none}
+.blocco-macchina b{font-weight:400;letter-spacing:.04em}
+
 .tipo-nascosto{display:none!important}
 .mpiede button:disabled,.tipo-tabs button:disabled,.allegato-azioni button:disabled{opacity:.42;cursor:not-allowed}
 .f input:disabled,.f textarea:disabled{opacity:.62;cursor:not-allowed}
 .opz label:has(input:disabled),.interr:has(input:disabled){opacity:.55;cursor:not-allowed}
 
 /* pagina delle prove fotografiche */
-.foto-riferimenti{display:grid;grid-template-columns:1.2fr 2.2fr .8fr .6fr;gap:2mm;margin-top:2mm}
-.foto-riferimenti>div{border-bottom:.5px solid var(--filo);min-height:7mm;padding:1mm 1.5mm;min-width:0}
-.foto-riferimenti span{display:block;font:6.3pt var(--sans);text-transform:uppercase;letter-spacing:.05em;color:#555}
-.foto-riferimenti b{display:block;min-width:0;font:8pt var(--serif);overflow-wrap:anywhere}
+.foto-riferimenti{display:grid;grid-template-columns:1.2fr 2.2fr .8fr .6fr;margin-top:3mm;
+  border-top:2px solid var(--g-inch);border-bottom:1px solid var(--g-inch)}
+.foto-riferimenti>div{min-height:9mm;padding:.8mm 1.5mm;min-width:0;border-left:1px solid var(--g-filo)}
+.foto-riferimenti>div:first-child{border-left:0;padding-left:0}
+.foto-riferimenti span{display:block;font:500 var(--lb)/1.3 var(--plex-c);text-transform:uppercase;letter-spacing:.04em;color:var(--g-eti)}
+.foto-riferimenti b{display:block;min-width:0;font:500 var(--val)/1.3 var(--plex);text-transform:uppercase;overflow-wrap:anywhere}
 .foto-griglia{display:grid;gap:4mm;flex:1;min-height:0;margin-top:3mm}
-.foto-cella{border:.7px solid var(--filo-forte);display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff;overflow:hidden}
+.foto-cella{border:1px solid var(--g-inch);display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff;overflow:hidden}
 .foto-cella .foto-scatto{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:1.5mm;overflow:hidden;background:#fff}
 .foto-cella img{max-width:100%;max-height:100%;object-fit:contain}
-.foto-cella .foto-testo{border-top:.5px solid var(--filo);padding:1.3mm 2mm;min-height:7mm}
-.foto-cella .foto-dida{font-family:var(--serif);font-size:8.6pt;line-height:1.3}
-.foto-cella .foto-impronta{display:block;font-family:var(--mono);font-size:5.8pt;letter-spacing:.04em;color:var(--grigio);margin-top:.7mm;overflow-wrap:anywhere}
-
-/* zona a lettura automatica: la rilegge il Registro Controlli */
-.blocco-macchina{margin-top:1.2mm;font-family:var(--mono);font-size:3.5pt;line-height:1.2;color:#7A7A7A;word-break:break-all;max-height:9mm;overflow:hidden}
-.blocco-macchina:empty{display:none}
-.blocco-macchina b{font-weight:400;letter-spacing:.06em}
+.foto-cella .foto-testo{border-top:1px solid var(--g-filo);padding:1.3mm 2mm;min-height:7mm}
+.foto-cella .foto-dida{font:500 8.6pt/1.3 var(--plex);text-transform:uppercase}
+.foto-cella .foto-impronta{display:block;font:400 5.8pt/1.3 var(--plex-m);letter-spacing:.04em;color:var(--g-tenue);margin-top:.7mm;overflow-wrap:anywhere}
 
 /* pagina catastale delle strutture ricettive */
-.cat-riferimenti{display:grid;grid-template-columns:1.4fr 2.4fr .55fr .7fr .55fr;gap:2mm;margin-top:2mm}
-.cat-riferimenti>div{border-bottom:.5px solid var(--filo);min-height:8mm;padding:1mm 1.5mm;min-width:0}
-.cat-riferimenti span{display:block;font:6.3pt var(--sans);text-transform:uppercase;letter-spacing:.05em;color:#555}
-.cat-riferimenti b{display:block;min-width:0;font:8pt var(--serif);overflow-wrap:anywhere}
-.cat-grid{display:grid;grid-template-columns:1fr;grid-template-rows:repeat(2,minmax(0,1fr));gap:3mm;flex:1;min-height:0;margin-top:3mm}
-.cat-box{border:.7px solid var(--filo-forte);display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}
-.cat-box .cat-titolo{background:var(--banda);border-bottom:.5px solid var(--filo);padding:1.6mm 2mm;
-  font-family:var(--serif);font-weight:700;font-size:9pt;font-variant:small-caps;letter-spacing:.05em;text-align:center}
-.cat-preview{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:2mm;overflow:hidden}
+.cat-riferimenti{display:grid;grid-template-columns:39.7mm 82.8mm 21.2mm 23.8mm 18.5mm;margin-top:3.6mm;
+  border-top:1px solid var(--g-inch);border-bottom:1px solid var(--g-inch)}
+.cat-riferimenti>div{min-height:10.4mm;padding:.8mm 1.5mm;min-width:0;border-left:1px solid var(--g-filo)}
+.cat-riferimenti>div:first-child{border-left:0;padding-left:0}
+.cat-riferimenti span{display:block;font:500 var(--lb)/1.3 var(--plex-c);text-transform:uppercase;letter-spacing:.04em;color:var(--g-eti)}
+.cat-riferimenti b{display:block;min-width:0;font:500 var(--val)/1.35 var(--plex);margin-top:.6mm;text-transform:uppercase;overflow-wrap:anywhere}
+.cat-grid{display:grid;grid-template-columns:1fr;grid-template-rows:repeat(2,minmax(0,1fr));row-gap:4.3mm;flex:1;min-height:0;margin-top:3.9mm}
+.cat-box{border-top:2px solid var(--g-inch);display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}
+.cat-box .cat-titolo{margin:0;display:flex;align-items:center;gap:1.5mm;min-height:var(--testa);
+  font:700 var(--st)/1 var(--plex);letter-spacing:.09em;text-transform:uppercase;color:var(--g-inch)}
+.cat-box .cat-titolo .num{font:600 var(--sn)/1 var(--plex-m);letter-spacing:0;color:var(--g-bronzo);min-width:3.2mm}
+.cat-preview{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:2mm;overflow:hidden;
+  border:1px solid var(--g-inch);border-bottom:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cpath d='M99.5 0V100M0 99.5H100' stroke='%23E5E7EB' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+  background-size:7.4mm 7.4mm;background-position:-1px -1px}
+.cat-preview.pieno{background-image:none}
 .cat-preview img{display:none;position:absolute;inset:2mm;width:calc(100% - 4mm);height:calc(100% - 4mm);object-fit:contain;object-position:center;background:#fff}
 .cat-preview.pieno img{display:block}
 .cat-preview.pieno .cat-vuoto{display:none}
-.cat-vuoto{padding:7mm;text-align:center;color:#888;font:italic 9pt var(--serif);line-height:1.5}
-.cat-nome{min-height:5mm;border-top:.5px solid var(--filo);padding:1mm 2mm;color:#777;font:6.8pt var(--mono);overflow-wrap:anywhere}
-.ric-riga-opzioni{display:flex;flex-wrap:wrap;gap:1.5mm 4mm;align-items:center}
-.ric-riga-opzioni .op{margin-right:0}
-#ricPag1 .ric-acc-riga{display:grid;grid-template-columns:auto 27mm auto 18mm auto minmax(34mm,1fr) auto 11mm;gap:0 1.5mm;align-items:end}
-#ricPag1 .ric-acc-riga .v{min-width:0;width:auto}
-#ricPag1 .ric-capacita-riga{display:grid;grid-template-columns:auto 18mm auto 18mm auto 18mm auto 18mm;gap:0 1.5mm;align-items:end}
-#ricPag1 .ric-esito-riga{display:flex;flex-wrap:wrap;align-items:center;gap:1mm 4mm}
+.cat-vuoto{padding:1mm 3mm;text-align:center;color:var(--g-tenue);font:italic 400 10px/1.4 var(--plex);background:#fff}
+.cat-nome{margin:0;min-height:6.1mm;border:1px solid var(--g-inch);border-top:1px solid var(--g-filo);
+  padding:1.4mm 2.4mm;color:var(--g-eti);font:400 8px/1.3 var(--plex-m);overflow-wrap:anywhere}
 
 @media (max-width:1080px){
   .app{grid-template-columns:1fr}
@@ -456,13 +493,6 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
   .spia{display:none!important}
   .netta{display:none}
   .v.attivo{background:transparent}
-  /* Safari/Quartz può rasterizzare il repeating-gradient come un blocco nero.
-     In stampa le righe sono quindi costruite con sottili ombre orizzontali. */
-  .righe{background:#fff!important;background-image:none!important;position:relative;overflow:hidden}
-  .righe::after{content:"";position:absolute;left:0;right:0;top:5.2mm;height:.4px;background:#BFBFBF;
-    box-shadow:0 5.2mm 0 #BFBFBF,0 10.4mm 0 #BFBFBF,0 15.6mm 0 #BFBFBF,
-               0 20.8mm 0 #BFBFBF,0 26mm 0 #BFBFBF,0 31.2mm 0 #BFBFBF,
-               0 36.4mm 0 #BFBFBF;pointer-events:none}
   *{print-color-adjust:exact;-webkit-print-color-adjust:exact}
 }
 </style>
@@ -545,228 +575,127 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
         <div class="cella"><div class="voce">P.IVA</div><div class="linea" data-v="piva"></div></div>
       </div>
 
-      <div class="titolone">Verbale di Ispezione</div>
-      <div class="titolino">Esercizio commerciale</div>
-      <div class="norma">art. 13 c. 1 legge 24 novembre 1981, n° 689</div>
-
-      <!-- ACCERTAMENTO -->
-      <div class="banda">Accertamento</div>
-      <div class="corpo">
-        <div class="rig"><span class="lb">Agenti Operanti</span><span class="v" data-v="agenti"></span></div>
-        <div class="rig">
-          <span class="lb">Data</span><span class="v media" data-v="data"></span>
-          <span class="lb">Ora</span><span class="v corta" data-v="ora"></span>
-          <span class="lb">Luogo <b>Napoli, Via/Piazza</b></span><span class="v caps" data-v="luogo"></span>
-          <span class="lb">n.</span><span class="v mini" data-v="civico"></span>
-        </div>
+      <div class="titolo-riga">
+        <div class="titolone">Verbale di Ispezione</div>
+        <div class="titolo-dx"><div class="titolino">Esercizio commerciale</div><div class="norma">art. 13 c. 1 legge 24 novembre 1981, n° 689</div></div>
       </div>
 
-      <!-- DATI ESERCIZIO -->
-      <div class="banda">Dati esercizio</div>
-      <div class="corpo">
-        <div class="rig">
-          <span class="lb">Ragione Sociale</span><span class="v caps" data-v="ragione"></span>
-          <span class="lb">Sede legale</span><span class="v caps" data-v="sede_legale"></span>
-        </div>
-        <div class="rig">
-          <span class="lb">Titolare / Legale rapp.</span><span class="v caps" data-v="titolare"></span>
-          <span class="lb">C.F.</span><span class="v caps" data-v="cf"></span>
-        </div>
-        <div class="rig">
-          <span class="lb">Nato/a</span><span class="v caps" data-v="nato"></span>
-          <span class="lb">prov.</span><span class="v mini" data-v="nato_prov"></span>
-          <span class="lb">data</span><span class="v media" data-v="nato_data"></span>
-        </div>
-        <div class="rig">
-          <span class="lb">Residente in</span><span class="v media caps" data-v="res"></span>
-          <span class="lb">Via/Piazza</span><span class="v caps" data-v="res_via"></span>
-          <span class="lb">n.</span><span class="v mini" data-v="res_n"></span>
-          <span class="lb">id. mezzo</span><span class="v media caps" data-v="id_mezzo"></span>
-          <span class="lb">n°</span><span class="v corta caps" data-v="id_n"></span>
-        </div>
-        <div class="rig">
-          <span class="lb">PEC</span><span class="v p2" data-v="ex_pec"></span>
-          <span class="lb">Telefono</span><span class="v p1" data-v="ex_tel"></span>
-        </div>
+      <section class="sez" data-sez="01">
+        <div class="sez-testa"><b class="num">01</b><span>Accertamento</span></div>
+        <div class="riga"><div class="c"><span class="lb">Agenti Operanti</span><span class="v" data-v="agenti"></span></div></div>
+        <div class="riga" style="grid-template-columns:29.1fr 21.2fr 119.8fr 15.9fr"><div class="c"><span class="lb">Data</span><span class="v" data-v="data"></span></div><div class="c"><span class="lb">Ora</span><span class="v" data-v="ora"></span></div><div class="c"><span class="lb">Luogo <b>Napoli, Via/Piazza</b></span><span class="v" data-v="luogo"></span></div><div class="c"><span class="lb">n.</span><span class="v" data-v="civico"></span></div></div>
+      </section>
+      <section class="sez" data-sez="02">
+        <div class="sez-testa"><b class="num">02</b><span>Dati esercizio</span></div>
+        <div class="riga" style="grid-template-columns:92.3fr 93.7fr"><div class="c"><span class="lb">Ragione Sociale</span><span class="v" data-v="ragione"></span></div><div class="c"><span class="lb">Sede legale</span><span class="v" data-v="sede_legale"></span></div></div>
+        <div class="riga" style="grid-template-columns:92.3fr 93.7fr"><div class="c"><span class="lb">Titolare / Legale rapp.</span><span class="v" data-v="titolare"></span></div><div class="c"><span class="lb">C.F.</span><span class="v" data-v="cf"></span></div></div>
+        <div class="riga" style="grid-template-columns:141.0fr 15.9fr 29.1fr"><div class="c"><span class="lb">Nato/a</span><span class="v" data-v="nato"></span></div><div class="c"><span class="lb">prov.</span><span class="v" data-v="nato_prov"></span></div><div class="c"><span class="lb">data</span><span class="v" data-v="nato_data"></span></div></div>
+        <div class="riga" style="grid-template-columns:34.4fr 85.5fr 13.2fr 29.1fr 23.8fr"><div class="c"><span class="lb">Residente in</span><span class="v" data-v="res"></span></div><div class="c"><span class="lb">Via/Piazza</span><span class="v" data-v="res_via"></span></div><div class="c"><span class="lb">n.</span><span class="v" data-v="res_n"></span></div><div class="c"><span class="lb">id. mezzo</span><span class="v" data-v="id_mezzo"></span></div><div class="c"><span class="lb">n°</span><span class="v" data-v="id_n"></span></div></div>
+        <div class="riga" style="grid-template-columns:127.8fr 58.2fr"><div class="c"><span class="lb">PEC</span><span class="v" data-v="ex_pec"></span></div><div class="c"><span class="lb">Telefono</span><span class="v" data-v="ex_tel"></span></div></div>
+      </section>
+      <section class="sez" data-sez="03">
+        <div class="sez-testa"><b class="num">03</b><span>Persona presente durante il controllo</span></div>
+        <div class="riga" style="grid-template-columns:92.3fr 93.7fr"><div class="c"><span class="lb">In qualità di</span><span class="v" data-v="p_qualita"></span></div><div class="c"><span class="lb">il/la Sig./ra</span><span class="v" data-v="p_nome"></span></div></div>
+        <div class="riga" style="grid-template-columns:141.0fr 15.9fr 29.1fr"><div class="c"><span class="lb">Nato/a a</span><span class="v" data-v="p_nato"></span></div><div class="c"><span class="lb">prov.</span><span class="v" data-v="p_prov"></span></div><div class="c"><span class="lb">data</span><span class="v" data-v="p_data"></span></div></div>
+        <div class="riga" style="grid-template-columns:85.7fr 87.1fr 13.2fr"><div class="c"><span class="lb">Residente in</span><span class="v" data-v="p_res"></span></div><div class="c"><span class="lb">Via/Piazza</span><span class="v" data-v="p_via"></span></div><div class="c"><span class="lb">n.</span><span class="v" data-v="p_n"></span></div></div>
+        <div class="riga" style="grid-template-columns:51.3fr 52.7fr 52.9fr 29.1fr"><div class="c"><span class="lb">Identificato a mezzo</span><span class="v" data-v="p_doc"></span></div><div class="c"><span class="lb">n°</span><span class="v" data-v="p_doc_n"></span></div><div class="c"><span class="lb">rilasciato da</span><span class="v" data-v="p_doc_da"></span></div><div class="c"><span class="lb">data</span><span class="v" data-v="p_doc_data"></span></div></div>
+      </section>
+      <div class="coppia">
+          <section class="sez" data-sez="04">
+            <div class="sez-testa"><b class="num">04</b><span>Tipologia attività</span></div>
+            <div class="riga"><div class="c opz"><span class="op"><i class="cb" data-v="t_somm"></i>Somministrazione</span><span class="op"><i class="cb" data-v="t_vic_alim"></i>Vicinato alim.</span><span class="op"><i class="cb" data-v="t_vic_non"></i>Vicinato non alim.</span><span class="op"><i class="cb" data-v="t_altro"></i>Altro</span></div></div>
+            <div class="riga"><div class="c"><span class="v" data-v="t_altro_txt"></span></div></div>
+          </section>
+        <section class="sez" data-sez="05">
+          <div class="sez-testa"><b class="num">05</b><span>Motivo del controllo</span></div>
+          <div class="blocco righe" style="--righe:2;--passo:var(--riga)" data-v="motivo"></div>
+        </section>
       </div>
-
-      <!-- PERSONA PRESENTE -->
-      <div class="banda">Persona presente durante il controllo</div>
-      <div class="corpo">
-        <div class="rig">
-          <span class="lb">In qualità di</span><span class="v" data-v="p_qualita"></span>
-          <span class="lb">il/la Sig./ra</span><span class="v caps" data-v="p_nome"></span>
-        </div>
-        <div class="rig">
-          <span class="lb">Nato/a a</span><span class="v caps" data-v="p_nato"></span>
-          <span class="lb">prov.</span><span class="v mini" data-v="p_prov"></span>
-          <span class="lb">data</span><span class="v media" data-v="p_data"></span>
-        </div>
-        <div class="rig">
-          <span class="lb">Residente in</span><span class="v caps" data-v="p_res"></span>
-          <span class="lb">Via/Piazza</span><span class="v caps" data-v="p_via"></span>
-          <span class="lb">n.</span><span class="v mini" data-v="p_n"></span>
-        </div>
-        <div class="rig">
-          <span class="lb">Identificato a mezzo</span><span class="v media caps" data-v="p_doc"></span>
-          <span class="lb">n°</span><span class="v media caps" data-v="p_doc_n"></span>
-          <span class="lb">rilasciato da</span><span class="v media caps" data-v="p_doc_da"></span>
-          <span class="lb">data</span><span class="v media" data-v="p_doc_data"></span>
-        </div>
+      <section class="sez" data-sez="06">
+        <div class="sez-testa"><b class="num">06</b><span>Titolo abilitativo</span><span class="art">art. 13 L. 689/81</span></div>
+        <div class="riga" style="grid-template-columns:133.1fr 52.9fr"><div class="c"><span class="op"><i class="cb" data-v="ta_si"></i><b>SI</b>&nbsp;— tipo</span><span class="v" data-v="ta_tipo"></span></div><div class="c"><span class="op"><i class="cb" data-v="ta_no"></i><b>NO</b>&nbsp;— PV n°</span><span class="v" data-v="ta_pv"></span></div></div>
+        <div class="riga" style="grid-template-columns:133.1fr 52.9fr"><div class="c"><span class="lb">Prot. n°</span><span class="v" data-v="ta_prot"></span></div><div class="c"><span class="lb">del</span><span class="v" data-v="ta_del"></span></div></div>
+      </section>
+      <div class="coppia">
+          <section class="sez" data-sez="07">
+            <div class="sez-testa"><b class="num">07</b><span>Notifica sanitaria</span></div>
+            <div class="riga" style="grid-template-columns:67.5fr 23.8fr"><div class="c"><span class="op"><i class="cb" data-v="ns_si"></i><b>SI</b>&nbsp;— prot. n°</span><span class="v" data-v="ns_prot"></span></div><div class="c"><span class="lb">del</span><span class="v" data-v="ns_del"></span></div></div>
+            <div class="riga"><div class="c"><span class="op"><i class="cb" data-v="ns_np"></i><b>Non Presente</b></span></div></div>
+          </section>
+        <section class="sez" data-sez="08">
+          <div class="sez-testa"><b class="num">08</b><span>Pubblicità / titoli esibiti</span><span class="art">art. 23 C.d.S.</span></div>
+          <div class="riga" style="grid-template-columns:67.2fr 23.8fr"><div class="c"><span class="lb">SCIA prot. n°</span><span class="v" data-v="pb_prot"></span></div><div class="c"><span class="lb">del</span><span class="v" data-v="pb_del"></span></div></div>
+          <div class="riga"><div class="c"><span class="op"><i class="cb" data-v="pb_np"></i><b>Non Presente</b></span></div></div>
+        </section>
       </div>
-
-      <!-- TIPOLOGIA | MOTIVO -->
-      <div class="duebande">
-        <div class="banda">Tipologia attività</div>
-        <div class="banda">Motivo del controllo</div>
+      <section class="sez" data-sez="09">
+        <div class="sez-testa"><b class="num">09</b><span>Presenza occupazione di suolo</span><span class="art">art. 20 C.d.S.</span></div>
+        <div class="riga" style="grid-template-columns:47.6fr 138.4fr"><div class="c"><span class="op"><i class="cb" data-v="os_si"></i><b>SI</b>&nbsp;— mq</span><span class="v" data-v="os_mq"></span></div><div class="c"><span class="op"><i class="cb" data-v="os_np"></i><b>Non Presente</b></span></div></div>
+        <div class="riga" style="grid-template-columns:109.3fr 23.8fr 15.9fr 37.0fr"><div class="c"><span class="lb">Concess. continuativa prot. n°</span><span class="v" data-v="os_c_prot"></span></div><div class="c"><span class="lb">del</span><span class="v" data-v="os_c_del"></span></div><div class="c"><span class="lb">mq</span><span class="v" data-v="os_c_mq"></span></div><div class="c"><span class="lb">Dehors tipo</span><span class="v" data-v="os_c_dehors"></span></div></div>
+        <div class="riga" style="grid-template-columns:109.3fr 23.8fr 15.9fr 37.0fr"><div class="c"><span class="lb">Concess./SCIA COVID prot. n°</span><span class="v" data-v="os_v_prot"></span></div><div class="c"><span class="lb">del</span><span class="v" data-v="os_v_del"></span></div><div class="c"><span class="lb">mq</span><span class="v" data-v="os_v_mq"></span></div><div class="c"><span class="lb">Dehors tipo</span><span class="v" data-v="os_v_dehors"></span></div></div>
+      </section>
+      <div class="coppia">
+          <section class="sez" data-sez="10">
+            <div class="sez-testa"><b class="num">10</b><span>Impatto acustico</span><span class="art">L. 447/1995 artt. 8 c.2, 10 c.3</span></div>
+            <div class="riga"><div class="c"><span class="lb">Relaz. / N.O. PZA Comune di Napoli</span><span class="v" data-v="acu"></span></div></div>
+          </section>
+        <section class="sez" data-sez="11">
+          <div class="sez-testa"><b class="num">11</b><span>Licenza / SCIA UTF alcolici</span><span class="art">art. 13-bis D.L. 34/2019</span></div>
+          <div class="riga"><div class="c"><span class="lb">Numero Licenza / Scia prot. n°</span><span class="v" data-v="utf"></span></div></div>
+        </section>
       </div>
-      <div class="duecol">
-        <div class="col">
-          <div class="rig" style="display:block">
-            <span class="op"><i class="cb" data-v="t_somm"></i>Somministrazione</span>
-            <span class="op"><i class="cb" data-v="t_vic_alim"></i>Vicinato alim.</span>
-            <span class="op"><i class="cb" data-v="t_vic_non"></i>Vicinato non alim.</span>
-            <span class="op"><i class="cb" data-v="t_altro"></i>Altro</span>
-          </div>
-          <div class="rig"><span class="v" data-v="t_altro_txt"></span></div>
+      <div class="coppia">
+          <section class="sez" data-sez="12">
+            <div class="sez-testa"><b class="num">12</b><span>SCIA eventi / agibilità</span></div>
+            <div class="riga" style="grid-template-columns:67.5fr 23.8fr"><div class="c"><span class="lb">Prot. n°</span><span class="v" data-v="ev_prot"></span></div><div class="c"><span class="lb">del</span><span class="v" data-v="ev_del"></span></div></div>
+            <div class="riga"><div class="c"><span class="op"><i class="cb" data-v="ev_np"></i><b>Non Presente</b></span></div></div>
+          </section>
+        <section class="sez" data-sez="13">
+          <div class="sez-testa"><b class="num">13</b><span>Gestione rifiuti</span><span class="art">Reg. P.U. n° 75/2022 art. 16</span></div>
+          <div class="riga"><div class="c opz centrata"><span class="op"><i class="cb" data-v="rf_ok"></i><b>Regolare</b></span><span class="op ko"><i class="cb" data-v="rf_ko"></i><span class="rosso">Non Regolare</span></span></div></div>
+        </section>
+      </div>
+      <div class="coppia">
+          <section class="sez" data-sez="14">
+            <div class="sez-testa"><b class="num">14</b><span>Divieto di fumo</span><span class="art">L. 584/75 e s.m.i.</span></div>
+            <div class="riga"><div class="c opz"><span class="op"><i class="cb" data-v="fu_ok"></i><b>Regolare</b></span><span class="op ko"><i class="cb" data-v="fu_ko"></i><span class="rosso">Non Regolare</span></span></div></div>
+          </section>
+        <section class="sez" data-sez="15">
+          <div class="sez-testa"><b class="num">15</b><span>Altri documenti</span></div>
+          <div class="riga"><div class="c"><span class="v" data-v="altri_doc"></span></div></div>
+        </section>
+      </div>
+      <section class="sez" data-sez="16">
+        <div class="sez-testa"><b class="num">16</b><span>Diffida</span><span class="art">D.Lgs. n° 103/2024</span></div>
+        <div class="riga"><div class="c opz"><span class="op"><i class="cb" data-v="df_si"></i><b>Sì</b></span><span class="op"><i class="cb" data-v="df_no"></i><b>No</b></span></div></div>
+      </section>
+      <section class="sez" data-sez="17">
+        <div class="sez-testa"><b class="num">17</b><span>Provvedimenti adottati</span></div>
+        <div class="blocco righe" style="--righe:1;--passo:6mm" data-v="provvedimenti"></div>
+      </section>
+      <section class="sez aperta" data-sez="18">
+        <div class="sez-testa"><b class="num">18</b><span>Definizione e chiusura</span></div>
+        <div class="formula" data-v="__formula"></div>
+      </section>
+      <section class="sez aperta" data-sez="19">
+        <div class="sez-testa"><b class="num">19</b><span>Firme</span></div>
+    <div class="firme">
+          <div class="slot" data-op="1"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="1"></span></div>
+          <div class="slot" data-op="2"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="2"></span></div>
+          <div class="slot" data-op="3"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="3"></span></div>
+          <div class="slot slot-parte vuoto"><span class="et">Firma della parte</span><div class="rigafirma"></div><span class="qual"></span></div>
         </div>
-        <div class="col">
-          <div class="rig"><span class="v" data-v="motivo"></span></div>
-        </div>
-      </div>
-
-      <!-- TITOLO ABILITATIVO -->
-      <div class="banda">Titolo abilitativo <span class="art">(art. 13 L. 689/81)</span></div>
-      <div class="corpo">
-        <div class="rig">
-          <span class="lb"><i class="cb" data-v="ta_si"></i><b>SI</b> — tipo</span><span class="v" data-v="ta_tipo"></span>
-          <span class="lb"><i class="cb" data-v="ta_no"></i><b>NO</b> — PV n°</span><span class="v media" data-v="ta_pv"></span>
-        </div>
-        <div class="rig">
-          <span class="lb">Prot. n°</span><span class="v" data-v="ta_prot"></span>
-          <span class="lb">del</span><span class="v media" data-v="ta_del"></span>
-        </div>
-      </div>
-
-      <!-- NOTIFICA SANITARIA | PUBBLICITÀ -->
-      <div class="duebande">
-        <div class="banda">Notifica sanitaria</div>
-        <div class="banda">Pubblicità / titoli esibiti <span class="art">(art. 23 C.d.S.)</span></div>
-      </div>
-      <div class="duecol">
-        <div class="col">
-          <div class="rig">
-            <span class="lb"><i class="cb" data-v="ns_si"></i><b>SI</b> — prot. n°</span><span class="v" data-v="ns_prot"></span>
-            <span class="lb">del</span><span class="v corta" data-v="ns_del"></span>
-          </div>
-          <div class="rig"><span class="lb"><i class="cb" data-v="ns_np"></i><b>Non Presente</b></span></div>
-        </div>
-        <div class="col">
-          <div class="rig">
-            <span class="lb">SCIA prot. n°</span><span class="v" data-v="pb_prot"></span>
-            <span class="lb">del</span><span class="v corta" data-v="pb_del"></span>
-          </div>
-          <div class="rig"><span class="lb"><i class="cb" data-v="pb_np"></i><b>Non Presente</b></span></div>
-        </div>
-      </div>
-
-      <!-- OCCUPAZIONE SUOLO -->
-      <div class="banda">Presenza occupazione di suolo <span class="art">(art. 20 C.d.S.)</span></div>
-      <div class="corpo">
-        <div class="rig">
-          <span class="lb"><i class="cb" data-v="os_si"></i><b>SI</b> — mq</span><span class="v media" data-v="os_mq"></span>
-          <span class="lb"><i class="cb" data-v="os_np"></i><b>Non Presente</b></span>
-        </div>
-        <div class="rig">
-          <span class="lb">Concess. continuativa prot. n°</span><span class="v" data-v="os_c_prot"></span>
-          <span class="lb">del</span><span class="v corta" data-v="os_c_del"></span>
-          <span class="lb">mq</span><span class="v mini" data-v="os_c_mq"></span>
-          <span class="lb">Dehors tipo</span><span class="v media" data-v="os_c_dehors"></span>
-        </div>
-        <div class="rig">
-          <span class="lb">Concess./SCIA COVID prot. n°</span><span class="v" data-v="os_v_prot"></span>
-          <span class="lb">del</span><span class="v corta" data-v="os_v_del"></span>
-          <span class="lb">mq</span><span class="v mini" data-v="os_v_mq"></span>
-          <span class="lb">Dehors tipo</span><span class="v media" data-v="os_v_dehors"></span>
-        </div>
-      </div>
-
-      <!-- IMPATTO ACUSTICO | ALCOLICI -->
-      <div class="duebande">
-        <div class="banda">Impatto acustico <span class="art">(L. 447/1995 artt. 8 c.2, 10 c.3)</span></div>
-        <div class="banda">Licenza / SCIA UTF <b>alcolici</b> <span class="art">(art. 13-bis D.L. 34/2019)</span></div>
-      </div>
-      <div class="duecol">
-        <div class="col"><div class="rig"><span class="lb">Relaz. / N.O. PZA Comune di Napoli</span><span class="v" data-v="acu"></span></div></div>
-        <div class="col"><div class="rig"><span class="lb">Numero Licenza / Scia prot. n°</span><span class="v" data-v="utf"></span></div></div>
-      </div>
-
-      <!-- SCIA EVENTI | RIFIUTI -->
-      <div class="duebande">
-        <div class="banda">SCIA eventi / agibilità</div>
-        <div class="banda">Gestione rifiuti <span class="art">(Reg. P.U. n° 75/2022 art. 16)</span></div>
-      </div>
-      <div class="duecol">
-        <div class="col">
-          <div class="rig">
-            <span class="lb">Prot. n°</span><span class="v" data-v="ev_prot"></span>
-            <span class="lb">del</span><span class="v corta" data-v="ev_del"></span>
-          </div>
-          <div class="rig"><span class="lb"><i class="cb" data-v="ev_np"></i><b>Non Presente</b></span></div>
-        </div>
-        <div class="col">
-          <div class="rig">
-            <span class="lb"><i class="cb" data-v="rf_ok"></i><b>Regolare</b></span>
-            <span class="lb" style="margin-left:4mm"><i class="cb" data-v="rf_ko"></i><span class="rosso">Non Regolare</span></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- FUMO | ALTRI DOCUMENTI -->
-      <div class="duebande">
-        <div class="banda">Divieto di fumo <span class="art">(L. 584/75 e s.m.i.)</span></div>
-        <div class="banda">Altri documenti</div>
-      </div>
-      <div class="duecol">
-        <div class="col">
-          <div class="rig">
-            <span class="lb"><i class="cb" data-v="fu_ok"></i><b>Regolare</b></span>
-            <span class="lb" style="margin-left:4mm"><i class="cb" data-v="fu_ko"></i><span class="rosso">Non Regolare</span></span>
-          </div>
-        </div>
-        <div class="col"><div class="rig"><span class="v" data-v="altri_doc"></span></div></div>
-      </div>
-
-      <!-- DIFFIDA -->
-      <div class="banda">Diffida <span class="art">(D.Lgs. n° 103/2024)</span></div>
-      <div class="corpo">
-        <div class="rig">
-          <span class="lb"><i class="cb" data-v="df_si"></i><b>Sì</b></span>
-          <span class="lb" style="margin-left:4mm"><i class="cb" data-v="df_no"></i><b>No</b></span>
-        </div>
-      </div>
-
-      <!-- PROVVEDIMENTI -->
-      <div class="banda">Provvedimenti adottati</div>
-      <div class="blocco" data-v="provvedimenti"></div>
-
-      <!-- FIRME -->
-      <div class="banda">Definizione e chiusura</div>
-      <div class="formula" data-v="__formula"></div>
-
-      <div class="banda">Firme</div>
-      <div class="firme">
-        <div class="slot" data-op="1"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="1"></span></div>
-        <div class="slot" data-op="2"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="2"></span></div>
-        <div class="slot" data-op="3"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="3"></span></div>
-        <div class="slot slot-parte vuoto"><span class="et">Firma della parte</span><div class="rigafirma"></div><span class="qual"></span></div>
-      </div>
-
+      </section>
       <div class="sigillo">
-        <div class="integrita"><span>Mod. ISP/COM 3.0 · U.O. San Lorenzo · Pag. 1 / 2</span><span class="impr" data-v="__sigillo1">documento non sigillato</span></div>
+        <div class="piede">
+          <svg class="marchio" viewBox="0 0 240 220" aria-hidden="true"><use href="#marchio"></use></svg>
+          <div class="recapiti">
+            <span class="contatti">Via C. Rosaroll, 31 — 80139 Napoli &nbsp;·&nbsp; tel. 081 7952812 &nbsp;·&nbsp; Uff. Polizia Amministrativa 081.7952809</span>
+            <span class="contatti">Email: polizialocale.sanlorenzo@comune.napoli.it &nbsp;·&nbsp; PEC: polizialocale.sanlorenzo@pec.comune.napoli.it</span>
+          </div>
+          <div class="integrita"><span>Mod. ISP/COM 3.0 · U.O. San Lorenzo · Pag. 1 / 2</span><span class="impr" data-v="__sigillo1">documento non sigillato</span></div>
+        </div>
         <div class="blocco-macchina" data-blocco-macchina></div>
-        <span class="contatti">Via C. Rosaroll, 31 — 80139 Napoli &nbsp; · &nbsp; tel. 081 7952812 &nbsp; · &nbsp; Uff. Polizia Amministrativa&nbsp; 081.7952809</span>
-        <span class="contatti">Email: polizialocale.sanlorenzo@comune.napoli.it &nbsp; · &nbsp; PEC: polizialocale.sanlorenzo@pec.comune.napoli.it</span>
       </div>
       </div>
     </section>
@@ -785,69 +714,61 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
       </header>
       <div class="doppiofilo"></div>
 
-      <div class="titolone" style="margin-top:4mm">Sopralluogo<span class="opzionale">facoltativo</span></div>
-      <div class="titolino">Rilievi, descrizione degli ambienti, annotazioni tecniche — da compilare solo se il controllo comporta rilievi sui luoghi</div>
-
-      <div class="duebande">
-        <div class="banda">Verbale collegato — n. fascicolo</div>
-        <div class="banda">Denominazione attività</div>
+      <div class="titolo-riga">
+        <div class="titolone">Sopralluogo</div><span class="opzionale">facoltativo</span>
       </div>
-      <div class="duecol">
-        <div class="col"><div class="rig"><span class="v caps" data-v="fascicolo"></span></div></div>
-        <div class="col"><div class="rig"><span class="v caps" data-v="denominazione"></span></div></div>
+      <div class="titolino sotto">Rilievi, descrizione degli ambienti, annotazioni tecniche — da compilare solo se il controllo comporta rilievi sui luoghi</div>
+
+      <div class="coppia">
+          <section class="sez" data-sez="S1">
+            <div class="sez-testa"><b class="num">S1</b><span>Verbale collegato — n. fascicolo</span></div>
+            <div class="riga alta"><div class="c"><span class="v" data-v="fascicolo"></span></div></div>
+          </section>
+        <section class="sez" data-sez="S2">
+          <div class="sez-testa"><b class="num">S2</b><span>Denominazione attività</span></div>
+          <div class="riga alta"><div class="c"><span class="v" data-v="denominazione"></span></div></div>
+        </section>
       </div>
-
-      <div class="banda">Dati sopralluogo</div>
-      <div class="corpo">
-        <div class="rig">
-          <span class="lb">Data</span><span class="v media" data-v="sl_data"></span>
-          <span class="lb">Ora inizio</span><span class="v corta" data-v="sl_ini"></span>
-          <span class="lb">Ora fine</span><span class="v corta" data-v="sl_fine"></span>
-        </div>
-        <div class="rig"><span class="lb">Presenti al sopralluogo</span><span class="v" data-v="sl_presenti"></span></div>
-      </div>
-
-      <div class="banda">Descrizione degli ambienti</div>
-      <div class="blocco righe" style="min-height:44mm" data-v="sl_ambienti"></div>
-
-      <div class="banda">Rilievi e criticità riscontrate</div>
-      <div class="blocco righe" style="min-height:36mm" data-v="sl_rilievi"></div>
-
-      <div class="banda">Documentazione acquisita</div>
-      <div class="corpo">
-        <div class="rig" style="display:block">
-          <span class="op"><i class="cb" data-v="dc_foto"></i>Fotografie</span>
-          <span class="op"><i class="cb" data-v="dc_plan"></i>Planimetrie</span>
-          <span class="op"><i class="cb" data-v="dc_scia"></i>SCIA</span>
-          <span class="op"><i class="cb" data-v="dc_cat"></i>Visura catastale</span>
-          <span class="op"><i class="cb" data-v="dc_contr"></i>Contratti</span>
-          <span class="op"><i class="cb" data-v="dc_altro"></i>Altro</span>
-        </div>
-        <div class="rig"><span class="lb">Note documentazione</span><span class="v" data-v="dc_note"></span></div>
-      </div>
-
-      <div class="banda">Osservazioni della parte</div>
-      <div class="blocco righe" style="min-height:34mm" data-v="sl_osserv"></div>
-
-      <div class="corpo" style="margin-top:1mm">
-        <div class="rig">
-          <span class="lb">Redatto e sottoscritto dai verbalizzanti in data</span><span class="v media" data-v="ch_data"></span>
-          <span class="lb">ore</span><span class="v corta" data-v="ch_ora"></span>
-          <span class="lb">.</span>
-        </div>
-      </div>
-
+      <section class="sez" data-sez="S3">
+        <div class="sez-testa"><b class="num">S3</b><span>Dati sopralluogo</span></div>
+        <div class="riga" style="grid-template-columns:42.3fr 34.4fr 34.4fr 74.9fr"><div class="c"><span class="lb">Data</span><span class="v" data-v="sl_data"></span></div><div class="c"><span class="lb">Ora inizio</span><span class="v" data-v="sl_ini"></span></div><div class="c"><span class="lb">Ora fine</span><span class="v" data-v="sl_fine"></span></div><div class="c"></div></div>
+        <div class="riga"><div class="c"><span class="lb">Presenti al sopralluogo</span><span class="v" data-v="sl_presenti"></span></div></div>
+      </section>
+      <section class="sez" data-sez="S4">
+        <div class="sez-testa"><b class="num">S4</b><span>Descrizione degli ambienti</span></div>
+        <div class="blocco righe" style="--righe:7;--passo:6.1mm" data-v="sl_ambienti"></div>
+      </section>
+      <section class="sez" data-sez="S5">
+        <div class="sez-testa"><b class="num">S5</b><span>Rilievi e criticità riscontrate</span></div>
+        <div class="blocco righe" style="--righe:6;--passo:5.8mm" data-v="sl_rilievi"></div>
+      </section>
+      <section class="sez" data-sez="S6">
+        <div class="sez-testa"><b class="num">S6</b><span>Documentazione acquisita</span></div>
+        <div class="riga"><div class="c opz"><span class="op"><i class="cb" data-v="dc_foto"></i>Fotografie</span><span class="op"><i class="cb" data-v="dc_plan"></i>Planimetrie</span><span class="op"><i class="cb" data-v="dc_scia"></i>SCIA</span><span class="op"><i class="cb" data-v="dc_cat"></i>Visura catastale</span><span class="op"><i class="cb" data-v="dc_contr"></i>Contratti</span><span class="op"><i class="cb" data-v="dc_altro"></i>Altro</span></div></div>
+        <div class="riga"><div class="c"><span class="lb">Note documentazione</span><span class="v" data-v="dc_note"></span></div></div>
+      </section>
+      <section class="sez" data-sez="S7">
+        <div class="sez-testa"><b class="num">S7</b><span>Osservazioni della parte</span></div>
+        <div class="blocco righe" style="--righe:5;--passo:6.35mm" data-v="sl_osserv"></div>
+      </section>
+      <section class="sez chiusa" data-sez="chiusura">
+        <div class="riga" style="grid-template-columns:122.5fr 39.7fr 23.8fr"><div class="c"><span class="testo">Redatto e sottoscritto dai verbalizzanti in data</span></div><div class="c"><span class="lb">data</span><span class="v" data-v="ch_data"></span></div><div class="c"><span class="lb">ore</span><span class="v" data-v="ch_ora"></span></div></div>
+      </section>
       <div class="firme">
         <div class="slot" data-op="1"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="1"></span></div>
         <div class="slot" data-op="2"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="2"></span></div>
         <div class="slot" data-op="3"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="3"></span></div>
         <div class="slot slot-parte vuoto"><span class="et">Firma della parte</span><div class="rigafirma"></div><span class="qual"></span></div>
       </div>
-
       <div class="sigillo">
-        <div class="integrita"><span>Mod. ISP/COM 3.0 · U.O. San Lorenzo · Pag. 2 / 2 · facoltativa</span><span class="impr" data-v="__sigillo2">documento non sigillato</span></div>
-        <span class="contatti">Via C. Rosaroll, 31 — 80139 Napoli &nbsp; · &nbsp; tel. 081 7952812 &nbsp; · &nbsp; Uff. Polizia Amministrativa&nbsp; 081.7952809</span>
-        <span class="contatti">Email: polizialocale.sanlorenzo@comune.napoli.it &nbsp; · &nbsp; PEC: polizialocale.sanlorenzo@pec.comune.napoli.it</span>
+        <div class="piede">
+          <svg class="marchio" viewBox="0 0 240 220" aria-hidden="true"><use href="#marchio"></use></svg>
+          <div class="recapiti">
+            <span class="contatti">Via C. Rosaroll, 31 — 80139 Napoli &nbsp;·&nbsp; tel. 081 7952812 &nbsp;·&nbsp; Uff. Polizia Amministrativa 081.7952809</span>
+            <span class="contatti">Email: polizialocale.sanlorenzo@comune.napoli.it &nbsp;·&nbsp; PEC: polizialocale.sanlorenzo@pec.comune.napoli.it</span>
+          </div>
+          <div class="integrita"><span>Mod. ISP/COM 3.0 · U.O. San Lorenzo · Pag. 2 / 2 · facoltativa</span><span class="impr" data-v="__sigillo2">documento non sigillato</span></div>
+        </div>
       </div>
       </div>
     </section>
