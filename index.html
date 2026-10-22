@@ -349,6 +349,7 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
 .op.ko .cb{border-color:var(--g-rosso)}
 .rosso{color:var(--g-rosso);font-weight:600}
 .op .lb{margin-right:1.6mm}
+.opz>.lb{margin-right:2.6mm}
 
 /* testo libero: righe vuote della griglia */
 .blocco{white-space:pre-wrap;overflow-wrap:anywhere;font:500 var(--val)/var(--passo) var(--plex);
@@ -372,6 +373,13 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
 .qual .matr{font:400 6.5px/1.3 var(--plex-m);letter-spacing:.04em;color:var(--g-eti);display:block;margin-top:.2mm}
 .chiusa{margin-top:var(--stacco)}
 #pag2 .titolino.sotto{margin-bottom:2.9mm}
+.riga.nera{border-bottom-color:var(--g-inch)}
+#ricPag1 .sez[data-sez="05"],#ricPag1 .sez[data-sez="06"]{--riga:4.8mm}
+#ricPag1 .titolo-riga{margin-bottom:3.6mm}
+#ricPag1 .sigillo .modello{float:left;margin:1mm 3mm 0 0}
+#ricPag1 .sigillo .blocco-macchina{margin-top:1.15mm}
+.c .dx{margin-left:auto;display:inline-flex;align-items:center}
+.c .dx .op{margin-right:0;margin-left:2mm}
 #pag2 .chiusa{margin-top:3.4mm}
 #pag2 .firme{margin-top:3mm}
 
@@ -420,7 +428,7 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
 .cat-riferimenti>div:first-child{border-left:0;padding-left:0}
 .cat-riferimenti span{display:block;font:500 var(--lb)/1.3 var(--plex-c);text-transform:uppercase;letter-spacing:.04em;color:var(--g-eti)}
 .cat-riferimenti b{display:block;min-width:0;font:500 var(--val)/1.35 var(--plex);margin-top:.6mm;text-transform:uppercase;overflow-wrap:anywhere}
-.cat-grid{display:grid;grid-template-columns:1fr;grid-template-rows:repeat(2,minmax(0,1fr));row-gap:4.3mm;flex:1;min-height:0;margin-top:3.9mm}
+.cat-grid{display:grid;grid-template-columns:1fr;grid-template-rows:repeat(2,minmax(0,1fr));row-gap:4.3mm;flex:1;min-height:0;margin-top:3.9mm;margin-bottom:3.7mm}
 .cat-box{border-top:2px solid var(--g-inch);display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}
 .cat-box .cat-titolo{margin:0;display:flex;align-items:center;gap:1.5mm;min-height:var(--testa);
   font:700 var(--st)/1 var(--plex);letter-spacing:.09em;text-transform:uppercase;color:var(--g-inch)}
@@ -782,88 +790,83 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
         <div class="cella"><div class="voce">P. IVA / C.F.</div><div class="linea v" data-v="ric_piva_cf"></div></div>
       </div>
 
-      <div class="titolone">Verbale di Ispezione</div>
-      <div class="titolino">Struttura ricettiva</div>
-      <div class="norma">Accertamento ai sensi dell'art. 13 della Legge 24 novembre 1981, n. 689</div>
-
-      <div class="banda">Tipologia della struttura</div>
-      <div class="corpo ric-riga-opzioni">
-        <span class="op"><i class="cb" data-v="ric_tip_aff"></i>Affittacamere</span>
-        <span class="op"><i class="cb" data-v="ric_tip_bb"></i>B&amp;B</span>
-        <span class="op"><i class="cb" data-v="ric_tip_casa"></i>Casa vacanze</span>
-        <span class="op"><i class="cb" data-v="ric_tip_hotel"></i>Hotel</span>
-        <span class="op"><i class="cb" data-v="ric_tip_loc"></i>Locazione breve</span>
-        <span class="op"><i class="cb" data-v="ric_tip_altro"></i>Altro:</span><span class="v media" data-v="ric_tip_altro_txt"></span>
+      <div class="titolo-riga">
+        <div class="titolone">Verbale di Ispezione</div>
+        <div class="titolo-dx"><div class="titolino">Struttura ricettiva</div><div class="norma">Accertamento ai sensi dell'art. 13 della Legge 24 novembre 1981, n. 689</div></div>
       </div>
 
-      <div class="banda">Accertamento</div>
-      <div class="corpo">
-        <div class="rig ric-acc-riga"><span class="lb">In data</span><span class="v" data-v="data"></span><span class="lb">alle ore</span><span class="v" data-v="ora"></span><span class="lb">in Napoli, alla</span><span class="v" data-v="luogo"></span><span class="lb">n.</span><span class="v" data-v="civico"></span></div>
-        <div class="rig"><span class="lb">i sottoscritti operanti</span><span class="v lunga" data-v="agenti"></span></div>
-        <div class="rig"><span class="lb">hanno proceduto al controllo per</span><span class="v lunga" data-v="motivo"></span></div>
-      </div>
-
-      <div class="banda">Persona presente durante il controllo</div>
-      <div class="corpo">
-        <div class="rig"><span class="lb">In qualità di</span><span class="v media" data-v="p_qualita"></span><span class="lb">il/la Sig./ra</span><span class="v lunga" data-v="p_nome"></span></div>
-        <div class="rig"><span class="lb">nato/a a</span><span class="v media" data-v="p_nato"></span><span class="lb">il</span><span class="v media" data-v="p_data"></span><span class="lb">residente in</span><span class="v lunga" data-v="p_res"></span></div>
-        <div class="rig"><span class="lb">via/piazza</span><span class="v lunga" data-v="p_via"></span><span class="lb">identificato/a a mezzo</span><span class="v media" data-v="p_doc"></span><span class="lb">n.</span><span class="v media" data-v="p_doc_n"></span><span class="lb">rilasciato da</span><span class="v media" data-v="p_doc_da"></span><span class="lb">il</span><span class="v media" data-v="p_doc_data"></span></div>
-      </div>
-
-      <div class="banda">Titolare / rappresentante legale / amministratore</div>
-      <div class="corpo">
-        <div class="rig"><span class="lb">Sig./ra</span><span class="v lunga" data-v="titolare"></span><span class="lb">C.F.</span><span class="v media" data-v="cf"></span></div>
-        <div class="rig"><span class="lb">nato/a a</span><span class="v media" data-v="nato"></span><span class="lb">il</span><span class="v media" data-v="nato_data"></span><span class="lb">residente in</span><span class="v lunga" data-v="res"></span></div>
-        <div class="rig"><span class="lb">via/piazza</span><span class="v lunga" data-v="res_via"></span><span class="lb">identificato/a a mezzo</span><span class="v media" data-v="id_mezzo"></span><span class="lb">n.</span><span class="v corta" data-v="id_n"></span></div>
-        <div class="rig"><span class="lb">tel.</span><span class="v media" data-v="ex_tel"></span><span class="lb">PEC</span><span class="v lunga" data-v="ex_pec"></span></div>
-      </div>
-
-      <div class="banda">Documentazione dell'attività</div>
-      <div class="corpo">
-        <div class="rig"><span class="lb">SCIA / comunicazione prot. n.</span><span class="v media" data-v="ric_scia_prot"></span><span class="lb">del</span><span class="v media" data-v="ric_scia_del"></span><span class="lb">CIN</span><span class="v lunga" data-v="ric_cin"></span></div>
-        <div class="rig"><span class="lb">Autorizzazione sanitaria n.</span><span class="v media" data-v="ric_aut_san_n"></span><span class="lb">del</span><span class="v media" data-v="ric_aut_san_data"></span><span class="lb">rilasciata da</span><span class="v lunga" data-v="ric_aut_san_da"></span><span class="lb">tipo</span><span class="v media" data-v="ric_aut_san_tipo"></span></div>
-        <div class="rig"><span class="lb">Autorizzazione amministrativa n.</span><span class="v media" data-v="ric_aut_amm_n"></span><span class="lb">del</span><span class="v media" data-v="ric_aut_amm_data"></span><span class="lb">tipo</span><span class="v lunga" data-v="ric_aut_amm_tipo"></span></div>
-        <div class="rig"><span class="lb">Agibilità n.</span><span class="v media" data-v="ric_agib_n"></span><span class="lb">del</span><span class="v media" data-v="ric_agib_data"></span><span class="lb">rilasciata da</span><span class="v lunga" data-v="ric_agib_da"></span></div>
-        <div class="ric-riga-opzioni">
-          <span class="op">Alloggiati Web <i class="cb" data-v="ric_allog_si"></i>Sì <i class="cb" data-v="ric_allog_no"></i>No</span>
-          <span class="op">Imposta di soggiorno <i class="cb" data-v="ric_tax_si"></i>Sì <i class="cb" data-v="ric_tax_no"></i>No</span>
-          <span class="op">Prevenzione Legionella <i class="cb" data-v="ric_leg_si"></i>Sì <i class="cb" data-v="ric_leg_no"></i>No</span>
-          <span class="op">Sicurezza impianti <i class="cb" data-v="ric_imp_si"></i>Sì <i class="cb" data-v="ric_imp_no"></i>No</span>
+      <section class="sez" data-sez="01">
+        <div class="sez-testa"><b class="num">01</b><span>Tipologia della struttura</span></div>
+        <div class="riga" style="grid-template-columns:141.0fr 45.0fr"><div class="c opz"><span class="op"><i class="cb" data-v="ric_tip_aff"></i>Affittacamere</span><span class="op"><i class="cb" data-v="ric_tip_bb"></i>B&amp;B</span><span class="op"><i class="cb" data-v="ric_tip_casa"></i>Casa vacanze</span><span class="op"><i class="cb" data-v="ric_tip_hotel"></i>Hotel</span><span class="op"><i class="cb" data-v="ric_tip_loc"></i>Locazione breve</span><span class="op"><i class="cb" data-v="ric_tip_altro"></i>Altro:</span></div><div class="c"><span class="v" data-v="ric_tip_altro_txt"></span></div></div>
+      </section>
+      <section class="sez" data-sez="02">
+        <div class="sez-testa"><b class="num">02</b><span>Accertamento</span></div>
+        <div class="riga" style="grid-template-columns:31.8fr 23.8fr 114.5fr 15.9fr"><div class="c"><span class="lb">In data</span><span class="v" data-v="data"></span></div><div class="c"><span class="lb">alle ore</span><span class="v" data-v="ora"></span></div><div class="c"><span class="lb">in Napoli, alla</span><span class="v" data-v="luogo"></span></div><div class="c"><span class="lb">n.</span><span class="v" data-v="civico"></span></div></div>
+        <div class="riga"><div class="c"><span class="lb">i sottoscritti operanti</span><span class="v" data-v="agenti"></span></div></div>
+        <div class="riga"><div class="c"><span class="lb">hanno proceduto al controllo per</span><span class="v" data-v="motivo"></span></div></div>
+      </section>
+      <section class="sez" data-sez="03">
+        <div class="sez-testa"><b class="num">03</b><span>Persona presente durante il controllo</span></div>
+        <div class="riga" style="grid-template-columns:58.2fr 127.8fr"><div class="c"><span class="lb">In qualità di</span><span class="v" data-v="p_qualita"></span></div><div class="c"><span class="lb">il/la Sig./ra</span><span class="v" data-v="p_nome"></span></div></div>
+        <div class="riga" style="grid-template-columns:58.2fr 29.1fr 98.7fr"><div class="c"><span class="lb">nato/a a</span><span class="v" data-v="p_nato"></span></div><div class="c"><span class="lb">il</span><span class="v" data-v="p_data"></span></div><div class="c"><span class="lb">residente in</span><span class="v" data-v="p_res"></span></div></div>
+        <div class="riga" style="grid-template-columns:80.2fr 31.7fr 23.8fr 29.1fr 21.2fr"><div class="c"><span class="lb">via/piazza</span><span class="v" data-v="p_via"></span></div><div class="c"><span class="lb">identificato/a a mezzo</span><span class="v" data-v="p_doc"></span></div><div class="c"><span class="lb">n.</span><span class="v" data-v="p_doc_n"></span></div><div class="c"><span class="lb">rilasciato da</span><span class="v" data-v="p_doc_da"></span></div><div class="c"><span class="lb">il</span><span class="v" data-v="p_doc_data"></span></div></div>
+      </section>
+      <section class="sez" data-sez="04">
+        <div class="sez-testa"><b class="num">04</b><span>Titolare / rappresentante legale / amministratore</span></div>
+        <div class="riga" style="grid-template-columns:133.1fr 52.9fr"><div class="c"><span class="lb">Sig./ra</span><span class="v" data-v="titolare"></span></div><div class="c"><span class="lb">C.F.</span><span class="v" data-v="cf"></span></div></div>
+        <div class="riga" style="grid-template-columns:58.2fr 29.1fr 98.7fr"><div class="c"><span class="lb">nato/a a</span><span class="v" data-v="nato"></span></div><div class="c"><span class="lb">il</span><span class="v" data-v="nato_data"></span></div><div class="c"><span class="lb">residente in</span><span class="v" data-v="res"></span></div></div>
+        <div class="riga" style="grid-template-columns:114.6fr 42.3fr 29.1fr"><div class="c"><span class="lb">via/piazza</span><span class="v" data-v="res_via"></span></div><div class="c"><span class="lb">identificato/a a mezzo</span><span class="v" data-v="id_mezzo"></span></div><div class="c"><span class="lb">n.</span><span class="v" data-v="id_n"></span></div></div>
+        <div class="riga" style="grid-template-columns:47.6fr 138.4fr"><div class="c"><span class="lb">tel.</span><span class="v" data-v="ex_tel"></span></div><div class="c"><span class="lb">PEC</span><span class="v" data-v="ex_pec"></span></div></div>
+      </section>
+      <section class="sez" data-sez="05">
+        <div class="sez-testa"><b class="num">05</b><span>Documentazione dell'attività</span></div>
+        <div class="riga" style="grid-template-columns:104.0fr 29.1fr 52.9fr"><div class="c"><span class="lb">SCIA / comunicazione prot. n.</span><span class="v" data-v="ric_scia_prot"></span></div><div class="c"><span class="lb">del</span><span class="v" data-v="ric_scia_del"></span></div><div class="c"><span class="lb">CIN</span><span class="v" data-v="ric_cin"></span></div></div>
+        <div class="riga" style="grid-template-columns:45.0fr 26.4fr 82.9fr 31.7fr"><div class="c"><span class="lb">Autorizzazione sanitaria n.</span><span class="v" data-v="ric_aut_san_n"></span></div><div class="c"><span class="lb">del</span><span class="v" data-v="ric_aut_san_data"></span></div><div class="c"><span class="lb">rilasciata da</span><span class="v" data-v="ric_aut_san_da"></span></div><div class="c"><span class="lb">tipo</span><span class="v" data-v="ric_aut_san_tipo"></span></div></div>
+        <div class="riga" style="grid-template-columns:71.4fr 26.5fr 88.1fr"><div class="c"><span class="lb">Autorizzazione amministrativa n.</span><span class="v" data-v="ric_aut_amm_n"></span></div><div class="c"><span class="lb">del</span><span class="v" data-v="ric_aut_amm_data"></span></div><div class="c"><span class="lb">tipo</span><span class="v" data-v="ric_aut_amm_tipo"></span></div></div>
+        <div class="riga" style="grid-template-columns:45.0fr 26.4fr 114.6fr"><div class="c"><span class="lb">Agibilità n.</span><span class="v" data-v="ric_agib_n"></span></div><div class="c"><span class="lb">del</span><span class="v" data-v="ric_agib_data"></span></div><div class="c"><span class="lb">rilasciata da</span><span class="v" data-v="ric_agib_da"></span></div></div>
+        <div class="riga" style="grid-template-columns:45.2fr 47.1fr 46.9fr 46.8fr"><div class="c"><span class="lb nero">Alloggiati Web</span><span class="dx"><span class="op"><i class="cb" data-v="ric_allog_si"></i>Sì</span><span class="op"><i class="cb" data-v="ric_allog_no"></i>No</span></span></div><div class="c"><span class="lb nero">Imposta di soggiorno</span><span class="dx"><span class="op"><i class="cb" data-v="ric_tax_si"></i>Sì</span><span class="op"><i class="cb" data-v="ric_tax_no"></i>No</span></span></div><div class="c"><span class="lb nero">Prevenzione Legionella</span><span class="dx"><span class="op"><i class="cb" data-v="ric_leg_si"></i>Sì</span><span class="op"><i class="cb" data-v="ric_leg_no"></i>No</span></span></div><div class="c"><span class="lb nero">Sicurezza impianti</span><span class="dx"><span class="op"><i class="cb" data-v="ric_imp_si"></i>Sì</span><span class="op"><i class="cb" data-v="ric_imp_no"></i>No</span></span></div></div>
+      </section>
+      <section class="sez" data-sez="06">
+        <div class="sez-testa"><b class="num">06</b><span>Dati catastali e capacità ricettiva</span></div>
+        <div class="riga" style="grid-template-columns:25.1fr 27.0fr 26.8fr 26.7fr 26.7fr 27.0fr 26.7fr"><div class="c"><span class="lb">Foglio</span><span class="v" data-v="ric_foglio"></span></div><div class="c"><span class="lb">Particella</span><span class="v" data-v="ric_part"></span></div><div class="c"><span class="lb">Sub.</span><span class="v" data-v="ric_sub"></span></div><div class="c"><span class="lb">Sez. urbana</span><span class="v" data-v="ric_sez"></span></div><div class="c"><span class="lb">Cat.</span><span class="v" data-v="ric_cat"></span></div><div class="c"><span class="lb">Superficie mq</span><span class="v" data-v="ric_superficie"></span></div><div class="c"><span class="lb">Bagni</span><span class="v" data-v="ric_bagni"></span></div></div>
+        <div class="riga" style="grid-template-columns:45.2fr 47.1fr 46.9fr 46.8fr"><div class="c"><span class="lb"><b>Dichiarate:</b> camere</span><span class="v" data-v="ric_cam_dich"></span></div><div class="c"><span class="lb">posti letto</span><span class="v" data-v="ric_letti_dich"></span></div><div class="c"><span class="lb"><b>Accertate:</b> camere</span><span class="v" data-v="ric_cam_acc"></span></div><div class="c"><span class="lb">posti letto</span><span class="v" data-v="ric_letti_acc"></span></div></div>
+        <div class="riga" style="grid-template-columns:58.2fr 127.8fr"><div class="c"><span class="lb">Periodo di apertura</span><span class="v" data-v="ric_periodo"></span></div><div class="c opz"><span class="lb">Esito rispetto a quanto dichiarato</span><span class="op"><i class="cb" data-v="ric_esito_ok"></i><b>Conforme</b></span><span class="op ko"><i class="cb" data-v="ric_esito_ko"></i><span class="rosso">Non conforme</span></span></div></div>
+      </section>
+      <section class="sez" data-sez="07">
+        <div class="sez-testa"><b class="num">07</b><span>All'atto dell'ispezione è stato accertato</span></div>
+        <div class="blocco righe" style="--righe:3" data-v="ric_accertato"></div>
+      </section>
+      <section class="sez" data-sez="08">
+        <div class="sez-testa"><b class="num">08</b><span>Note</span></div>
+        <div class="blocco righe" style="--righe:2" data-v="ric_note"></div>
+      </section>
+      <section class="sez" data-sez="09">
+        <div class="sez-testa"><b class="num">09</b><span>Violazioni contestate</span></div>
+        <div class="riga" style="grid-template-columns:58.2fr 127.8fr"><div class="c"><span class="lb">P.V. n.</span><span class="v" data-v="ric_pv1"></span></div><div class="c"><span class="lb">art.</span><span class="v" data-v="ric_art1"></span></div></div>
+        <div class="riga" style="grid-template-columns:58.2fr 127.8fr"><div class="c"><span class="lb">P.V. n.</span><span class="v" data-v="ric_pv2"></span></div><div class="c"><span class="lb">art.</span><span class="v" data-v="ric_art2"></span></div></div>
+        <div class="riga nera" style="grid-template-columns:58.2fr 127.8fr"><div class="c"><span class="lb">P.V. n.</span><span class="v" data-v="ric_pv3"></span></div><div class="c"><span class="lb">art.</span><span class="v" data-v="ric_art3"></span></div></div>
+        <div class="riga" style="grid-template-columns:119.9fr 37.0fr 29.1fr"><div class="c"><span class="testo">Il verbale viene chiuso in data</span></div><div class="c"><span class="lb">data</span><span class="v" data-v="ch_data"></span></div><div class="c"><span class="lb">alle ore</span><span class="v" data-v="ch_ora"></span></div></div>
+      </section>
+      <section class="sez aperta" data-sez="10">
+        <div class="sez-testa"><b class="num">10</b><span>Firme</span></div>
+        <div class="firme">
+          <div class="slot slot-parte vuoto"><span class="et">Firma della parte</span><div class="rigafirma"></div><span class="qual"></span></div>
+          <div class="slot" data-op="1"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="1"></span></div>
+          <div class="slot" data-op="2"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="2"></span></div>
+          <div class="slot" data-op="3"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="3"></span></div>
         </div>
-      </div>
-
-      <div class="banda">Dati catastali e capacità ricettiva</div>
-      <div class="corpo">
-        <div class="rig"><span class="lb">Foglio</span><span class="v corta" data-v="ric_foglio"></span><span class="lb">Particella</span><span class="v corta" data-v="ric_part"></span><span class="lb">Sub.</span><span class="v corta" data-v="ric_sub"></span><span class="lb">Sez. urbana</span><span class="v corta" data-v="ric_sez"></span><span class="lb">Cat.</span><span class="v corta" data-v="ric_cat"></span><span class="lb">Superficie mq</span><span class="v corta" data-v="ric_superficie"></span><span class="lb">Bagni</span><span class="v cortissima" data-v="ric_bagni"></span></div>
-        <div class="rig ric-capacita-riga"><span class="lb">Dichiarate: camere</span><span class="v" data-v="ric_cam_dich"></span><span class="lb">posti letto</span><span class="v" data-v="ric_letti_dich"></span><span class="lb">Accertate: camere</span><span class="v" data-v="ric_cam_acc"></span><span class="lb">posti letto</span><span class="v" data-v="ric_letti_acc"></span></div>
-        <div class="ric-esito-riga"><span class="lb">Periodo di apertura</span><span class="v media" data-v="ric_periodo"></span><span class="lb">Esito rispetto a quanto dichiarato</span><span class="op"><i class="cb" data-v="ric_esito_ok"></i>Conforme</span><span class="op"><i class="cb" data-v="ric_esito_ko"></i>Non conforme</span></div>
-      </div>
-
-      <div class="banda">All'atto dell'ispezione è stato accertato</div>
-      <div class="blocco righe" style="min-height:20mm" data-v="ric_accertato"></div>
-      <div class="banda">Note</div>
-      <div class="blocco righe" style="min-height:13mm" data-v="ric_note"></div>
-
-      <div class="banda">Violazioni contestate</div>
-      <div class="corpo">
-        <div class="rig"><span class="lb">P.V. n.</span><span class="v media" data-v="ric_pv1"></span><span class="lb">art.</span><span class="v lunga" data-v="ric_art1"></span></div>
-        <div class="rig"><span class="lb">P.V. n.</span><span class="v media" data-v="ric_pv2"></span><span class="lb">art.</span><span class="v lunga" data-v="ric_art2"></span></div>
-        <div class="rig"><span class="lb">P.V. n.</span><span class="v media" data-v="ric_pv3"></span><span class="lb">art.</span><span class="v lunga" data-v="ric_art3"></span></div>
-        <div class="rig"><span class="lb">Il verbale viene chiuso in data</span><span class="v media" data-v="ch_data"></span><span class="lb">alle ore</span><span class="v corta" data-v="ch_ora"></span></div>
-      </div>
-
-      <div class="firme">
-        <div class="slot slot-parte vuoto"><span class="et">Firma della parte</span><div class="rigafirma"></div><span class="qual"></span></div>
-        <div class="slot" data-op="1"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="1"></span></div>
-        <div class="slot" data-op="2"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="2"></span></div>
-        <div class="slot" data-op="3"><span class="et">Il Verbalizzante</span><div class="rigafirma"></div><span class="qual" data-q="3"></span></div>
-      </div>
-
+      </section>
       <div class="sigillo">
-        <div class="integrita"><span>Mod. ISP/RIC 4.0 · U.O. San Lorenzo · Pag. 1 / 2</span><span class="impr" data-v="__sigillo1">documento non sigillato</span></div>
+        <div class="piede">
+          <svg class="marchio" viewBox="0 0 240 220" aria-hidden="true"><use href="#marchio"></use></svg>
+          <div class="recapiti">
+            <span class="contatti">Via C. Rosaroll, 31 — 80139 Napoli &nbsp;·&nbsp; tel. 081 7952812 &nbsp;·&nbsp; Uff. Polizia Amministrativa 081.7952809</span>
+            <span class="contatti">Email: polizialocale.sanlorenzo@comune.napoli.it &nbsp;·&nbsp; PEC: polizialocale.sanlorenzo@pec.comune.napoli.it</span>
+          </div>
+          <div class="integrita"><span>Mod. ISP/RIC 4.0 · U.O. San Lorenzo · Pag. 1 / 2</span><span class="impr" data-v="__sigillo1">documento non sigillato</span></div>
+        </div>
+        <div class="modello">Mod. ISP/RIC 4.0 · U.O. San Lorenzo · Pag. 1 / 2</div>
         <div class="blocco-macchina" data-blocco-macchina></div>
-        <span class="contatti">Via C. Rosaroll, 31 — 80139 Napoli &nbsp; · &nbsp; tel. 081 7952812 &nbsp; · &nbsp; Uff. Polizia Amministrativa&nbsp; 081.7952809</span>
-        <span class="contatti">Email: polizialocale.sanlorenzo@comune.napoli.it &nbsp; · &nbsp; PEC: polizialocale.sanlorenzo@pec.comune.napoli.it</span>
       </div>
       </div>
     </section>
@@ -871,8 +874,10 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
     <section class="foglio fine-scheda tipo-nascosto" id="ricPag2" data-tipo-scheda="ricettive"><span class="spia">contenuto ridotto</span><div class="contenuto">
       <header class="testata" data-testata-clone></header>
       <div class="doppiofilo"></div>
-      <div class="titolone">Documentazione Catastale</div>
-      <div class="titolino">Allegata al verbale d'ispezione della struttura ricettiva</div>
+      <div class="titolo-riga">
+        <div class="titolone">Documentazione Catastale</div>
+        <div class="titolo-dx"><div class="titolino">Allegata al verbale d'ispezione della struttura ricettiva</div></div>
+      </div>
       <div class="cat-riferimenti">
         <div><span>Fascicolo</span><b class="v" data-v="fascicolo"></b></div>
         <div><span>Denominazione</span><b class="v caps" data-v="denominazione"></b></div>
@@ -882,20 +887,26 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
       </div>
       <div class="cat-grid">
         <article class="cat-box">
-          <h3 class="cat-titolo">Planimetria catastale</h3>
+          <h3 class="cat-titolo"><b class="num">C1</b>Planimetria catastale</h3>
           <div class="cat-preview" id="previewPlanimetria"><span class="cat-vuoto">Planimetria catastale non acquisita</span><img id="imgPlanimetria" alt="Planimetria catastale acquisita"></div>
           <p class="cat-nome" id="nomePlanimetria">Nessun documento allegato</p>
         </article>
         <article class="cat-box">
-          <h3 class="cat-titolo">Visura catastale</h3>
+          <h3 class="cat-titolo"><b class="num">C2</b>Visura catastale</h3>
           <div class="cat-preview" id="previewVisura"><span class="cat-vuoto">Visura catastale non acquisita</span><img id="imgVisura" alt="Visura catastale acquisita"></div>
           <p class="cat-nome" id="nomeVisura">Nessun documento allegato</p>
         </article>
       </div>
       <div class="sigillo">
-        <div class="integrita"><span>Mod. ISP/RIC 4.0 · U.O. San Lorenzo · Pag. 2 / 2</span><span class="impr" data-v="__sigillo2">documento non sigillato</span></div>
-        <span class="contatti">Via C. Rosaroll, 31 — 80139 Napoli &nbsp; · &nbsp; tel. 081 7952812 &nbsp; · &nbsp; Uff. Polizia Amministrativa&nbsp; 081.7952809</span>
-        <span class="contatti">Email: polizialocale.sanlorenzo@comune.napoli.it &nbsp; · &nbsp; PEC: polizialocale.sanlorenzo@pec.comune.napoli.it</span>
+        <div class="piede">
+          <svg class="marchio" viewBox="0 0 240 220" aria-hidden="true"><use href="#marchio"></use></svg>
+          <div class="recapiti">
+            <span class="contatti">Via C. Rosaroll, 31 — 80139 Napoli &nbsp;·&nbsp; tel. 081 7952812 &nbsp;·&nbsp; Uff. Polizia Amministrativa 081.7952809</span>
+            <span class="contatti">Email: polizialocale.sanlorenzo@comune.napoli.it &nbsp;·&nbsp; PEC: polizialocale.sanlorenzo@pec.comune.napoli.it</span>
+          </div>
+          <div class="integrita"><span>Mod. ISP/RIC 4.0 · U.O. San Lorenzo · Pag. 2 / 2</span><span class="impr" data-v="__sigillo2">documento non sigillato</span></div>
+        </div>
+        <div class="modello">Mod. ISP/RIC 4.0 · U.O. San Lorenzo · Pag. 2 / 2</div>
       </div>
       </div>
     </section>
