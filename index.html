@@ -157,6 +157,19 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
 .foto-azioni button{border:1px solid #345073;border-radius:5px;background:#1B2C47;color:#DCE6F5;padding:7px 10px;font:10px var(--mono);cursor:pointer}
 .foto-azioni button.scatta{background:#55327C;border-color:#7850A7;color:#fff;font-weight:700}
 .foto-azioni button:disabled{opacity:.42;cursor:not-allowed}
+.foto-azioni button.rimuovi{border-color:#74413F;background:#3A2022;color:#FFC4C1}
+.timbro-anteprima{background:#fff;border-radius:4px;padding:6px;margin-bottom:8px}
+.timbro-anteprima[hidden]{display:none}
+.timbro-anteprima img{display:block;max-width:100%;max-height:96px}
+.timbro-area{position:relative;margin:0 17px 12px;touch-action:none;user-select:none;-webkit-user-select:none;line-height:0}
+.timbro-area canvas{display:block;width:100%;height:auto;border-radius:4px}
+.timbro-sel{position:absolute;border:2px solid #35B989;box-shadow:0 0 0 9999px rgba(4,9,17,.55);cursor:move}
+.timbro-sel i{position:absolute;width:22px;height:22px;background:#35B989;border:2px solid #fff;border-radius:50%}
+.timbro-sel i[data-angolo="nw"]{left:-12px;top:-12px;cursor:nwse-resize}
+.timbro-sel i[data-angolo="ne"]{right:-12px;top:-12px;cursor:nesw-resize}
+.timbro-sel i[data-angolo="sw"]{left:-12px;bottom:-12px;cursor:nesw-resize}
+.timbro-sel i[data-angolo="se"]{right:-12px;bottom:-12px;cursor:nwse-resize}
+.timbro-area-cornice{overflow:hidden;border-radius:4px}
 .foto-vuoto{margin:9px 0 0;font-size:11px;color:var(--m-tenue)}
 .foto-riga{display:grid;grid-template-columns:46px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-top:1px solid #1E304B;margin-top:8px}
 .foto-riga:first-child{margin-top:9px}
@@ -389,6 +402,16 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
 .c .dx .op{margin-right:0;margin-left:2mm}
 #pag2 .chiusa{margin-top:3.4mm}
 #pag2 .firme{margin-top:3mm}
+/* versione digitale: i verbalizzanti sono indicati per nome, senza spazio
+   per la penna; la parte è rappresentata dal timbro o dallo scontrino */
+.firme.digitale .slot[data-op]{border-color:transparent;padding-left:0}
+.firme.digitale .slot::after{content:none}
+.firme.digitale .slot[data-op] .qual{padding-right:0}
+/* un po' più alto del riquadro per la penna, perché l'intestazione di uno
+   scontrino resti leggibile: sulla pagina 1 costa circa l'1% di scala */
+.firme.digitale.con-timbro{--firma:22mm}
+.firme .slot-parte .timbro{flex:1;min-height:0;margin-top:.6mm;display:flex;align-items:center}
+.firme .slot-parte .timbro img{display:block;max-width:100%;max-height:100%;object-fit:contain;object-position:left center}
 
 /* piè di pagina: marchio, recapiti, cartellino del sigillo, riga mono */
 .sigillo{margin-top:auto;border-top:2px solid var(--g-inch);padding-top:1.2mm;font-family:var(--plex);position:relative}
@@ -561,7 +584,7 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
       <button type="button" id="btnSvuota">Svuota</button>
       <button type="button" class="blu" id="btnStampa">Stampa / PDF</button>
       <button type="button" id="btnSigilla">Chiudi e sigilla</button>
-      <label class="interr modo-firma"><input type="checkbox" id="modalitaStampa"><span class="seg"></span><span>Versione da stampare — aggiungi la firma della parte</span></label>
+      <label class="interr modo-firma"><input type="checkbox" id="modalitaStampa"><span class="seg"></span><span>Versione da stampare — firme a penna di verbalizzanti e parte</span></label>
       <label class="interr"><input type="checkbox" id="conSopralluogo" checked><span class="seg"></span><span>Stampa anche il sopralluogo</span></label>
       <span class="msg" id="msg">Compila da qui: il verbale si aggiorna a destra.</span>
       <input type="file" id="fileJson" accept="application/json" hidden>
@@ -571,6 +594,8 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
       <input type="file" id="filePlanimetria" accept="application/pdf,image/png,image/jpeg,image/webp,image/heic,image/heif,.pdf,.png,.jpg,.jpeg,.webp,.heic,.heif" hidden>
       <input type="file" id="fileVisura" accept="application/pdf,image/png,image/jpeg,image/webp,image/heic,image/heif,.pdf,.png,.jpg,.jpeg,.webp,.heic,.heif" hidden>
       <input type="file" id="fileFotoScatto" accept="image/*,.heic,.heif" capture="environment" multiple hidden>
+      <input type="file" id="fileTimbroScatto" accept="image/*,.heic,.heif" capture="environment" hidden>
+      <input type="file" id="fileTimbroCarica" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,.png,.jpg,.jpeg,.webp,.heic,.heif" hidden>
       <input type="file" id="fileFotoCarica" accept="application/pdf,image/png,image/jpeg,image/webp,image/heic,image/heif,.pdf,.png,.jpg,.jpeg,.webp,.heic,.heif" multiple hidden>
     </div>
   </aside>
@@ -950,6 +975,28 @@ body{background:#1A2436;font-family:var(--sans);overflow:hidden}
     </div>
   </div>
 </section>
+<section class="mda-finestra" id="timbroModal" role="dialog" aria-modal="true" aria-labelledby="timbroTitolo" hidden>
+  <div class="mda-pannello">
+    <div class="mda-testa">
+      <div>
+        <h2 id="timbroTitolo">Timbro o scontrino della parte</h2>
+        <p>Trascina il riquadro verde sul timbro o sull’intestazione dello scontrino; gli angoli lo allargano. Il fondo del foglio viene sbiancato.</p>
+      </div>
+      <button type="button" class="mda-chiudi" id="timbroChiudi" aria-label="Chiudi">×</button>
+    </div>
+    <div class="mda-stato" id="timbroStato">Preparazione della fotografia…</div>
+    <div class="timbro-area" id="timbroArea">
+      <div class="timbro-area-cornice"><canvas id="timbroVista"></canvas></div>
+      <div class="timbro-sel" id="timbroSel" hidden><i data-angolo="nw"></i><i data-angolo="ne"></i><i data-angolo="sw"></i><i data-angolo="se"></i></div>
+    </div>
+    <div class="mda-piede">
+      <button type="button" id="timbroRuota">Ruota</button>
+      <button type="button" id="timbroTutta">Intera</button>
+      <button type="button" id="timbroAnnulla">Annulla</button>
+      <button type="button" class="principale" id="timbroUsa" disabled>Usa nel verbale</button>
+    </div>
+  </div>
+</section>
 
 <nav class="tabmob">
   <button type="button" class="att" data-vista="form">Compila</button>
@@ -1133,6 +1180,7 @@ const SEZIONI_COMMERCIALI = [
     ]},
     {k:"cn_pec", l:"Indirizzo PEC / mail (se diverso da quello dell'esercizio)", w:2},
     {k:"cn_data_trasm", l:"Data di trasmissione"},
+    {tipo:"timbro", l:"Timbro o scontrino della parte"},
   ]},
   {let:"M", tit:"Sopralluogo — pag. 2 (facoltativa)", campi:[
     {k:"fascicolo", l:"Verbale collegato — n. fascicolo", w:2},
@@ -1211,6 +1259,7 @@ const SEZIONI_RICETTIVE = [
     {k:"ric_pv2", l:"P.V. n. 2"}, {k:"ric_art2", l:"Articolo / violazione 2", w:2},
     {k:"ric_pv3", l:"P.V. n. 3"}, {k:"ric_art3", l:"Articolo / violazione 3", w:2},
     {k:"ch_data", l:"Data di chiusura"}, {k:"ch_ora", l:"Ora di chiusura"},
+    {tipo:"timbro", l:"Timbro o scontrino della parte"},
   ]},
   {let:"G", tit:"Documentazione catastale — pag. 2", campi:[
     {tipo:"allegato", k:"planimetria", l:"Planimetria catastale (PDF o foto)"},
@@ -1269,6 +1318,23 @@ SEZIONI.forEach((sez,idx)=>{
       box.className = "allegato-editor";
       box.innerHTML = '<div><strong>'+c.l+'</strong><span class="allegato-stato" data-allegato-stato="'+c.k+'">Nessun documento acquisito</span></div>'+
         '<div class="allegato-azioni"><button type="button" data-allegato-carica="'+c.k+'">Carica</button><button type="button" class="rimuovi" data-allegato-rimuovi="'+c.k+'">Rimuovi</button></div>';
+      corpo.appendChild(box);
+      return;
+    }
+    if(c.tipo === "timbro"){
+      scarica();
+      const box = document.createElement("div");
+      box.className = "foto-editor";
+      box.innerHTML = '<strong>'+c.l+'</strong>'
+        + '<span class="foto-spiega">Nella versione digitale prende il posto della firma a penna: fotografa il timbro '
+        + 'impresso su un foglio, oppure lo scontrino, e ritaglia l\u2019intestazione con il nome dell\u2019esercizio. '
+        + 'I verbalizzanti vengono indicati per nome, senza riquadro.</span>'
+        + '<div class="timbro-anteprima" data-timbro-anteprima hidden><img alt=""></div>'
+        + '<div class="foto-azioni">'
+        + '<button type="button" class="scatta" data-timbro-scatta>Fotografa</button>'
+        + '<button type="button" data-timbro-carica>Carica</button>'
+        + '<button type="button" class="rimuovi" data-timbro-rimuovi hidden>Rimuovi</button>'
+        + '</div>';
       corpo.appendChild(box);
       return;
     }
@@ -1483,16 +1549,24 @@ function componiAgenti(){
     }).join(" — ");
   });
 
+  const versioneStampa = !!document.getElementById("modalitaStampa")?.checked;
+  const timbro = versioneStampa ? "" : (dati.__timbro || "");
+  const conNome = [1,2,3].filter(i=>(dati["op"+i+"_nome"]||"").trim() || (dati["op"+i+"_grado"]||"").trim());
   document.querySelectorAll(".firme").forEach(blocco=>{
     let visibili = 0;
+    blocco.classList.toggle("digitale", !versioneStampa);
+    blocco.classList.toggle("con-timbro", !!timbro);
     blocco.querySelectorAll(".slot[data-op]").forEach(slot=>{
       const i = slot.dataset.op;
       const o = {grado:(dati["op"+i+"_grado"]||"").trim(),
                  nome:(dati["op"+i+"_nome"]||"").trim(),
                  matr:(dati["op"+i+"_matr"]||"").trim()};
       const pieno = !!(o.nome || o.grado);
-      // i primi due riquadri restano sempre, anche vuoti, per la firma a penna
-      const tieni = pieno || i !== "3";
+      /* Su carta i primi due riquadri restano sempre, anche vuoti, per la
+         firma a penna. In digitale si firma con il nome: compare solo chi è
+         indicato, e il primo resta se non c'è nessuno, per non lasciare la
+         sezione senza verbalizzanti. */
+      const tieni = versioneStampa ? (pieno || i !== "3") : (pieno || (!conNome.length && i === "1"));
       slot.classList.toggle("vuoto", !tieni);
       if(tieni) visibili++;
       const q = slot.querySelector(".qual");
@@ -1506,9 +1580,26 @@ function componiAgenti(){
       }
     });
     const firmaParte = blocco.querySelector(".slot-parte");
-    const versioneStampa = !!document.getElementById("modalitaStampa")?.checked;
-    if(firmaParte) firmaParte.classList.toggle("vuoto", !versioneStampa);
-    if(versioneStampa) visibili++;
+    const parteVisibile = versioneStampa || !!timbro;
+    if(firmaParte){
+      firmaParte.classList.toggle("vuoto", !parteVisibile);
+      const etichetta = firmaParte.querySelector(".et");
+      if(etichetta) etichetta.textContent = versioneStampa ? "Firma della parte" : "Timbro della parte";
+      let riquadro = firmaParte.querySelector(".timbro");
+      if(timbro){
+        if(!riquadro){
+          riquadro = document.createElement("div");
+          riquadro.className = "timbro";
+          riquadro.appendChild(document.createElement("img")).alt = "Timbro della parte";
+          firmaParte.appendChild(riquadro);
+        }
+        const img = riquadro.querySelector("img");
+        if(img.getAttribute("src") !== timbro) img.src = timbro;
+      }else if(riquadro){
+        riquadro.remove();
+      }
+    }
+    if(parteVisibile) visibili++;
     blocco.style.setProperty("--n", visibili || 2);
   });
 }
@@ -1519,11 +1610,238 @@ function impostaModalitaFirma(stampa, comunica){
   componiAgenti();
   if(comunica){
     nota(stampa
-      ? "Versione da stampare: aggiunto il campo Firma della parte"
-      : "Versione online: firme riservate ai verbalizzanti", true);
+      ? "Versione da stampare: riquadri per la firma a penna di verbalizzanti e parte"
+      : (dati.__timbro
+        ? "Versione digitale: verbalizzanti per nome, per la parte il timbro acquisito"
+        : "Versione digitale: verbalizzanti per nome. Acquisisci il timbro della parte nella sezione di chiusura"), true);
   }
   ricalcola();
 }
+
+/* ── timbro della parte (versione digitale) ──
+   Al posto della firma a penna si acquisisce una fotografia del timbro
+   impresso su un foglio, o dell'intestazione dello scontrino. L'immagine
+   entra nei campi della scheda (__timbro), quindi nel JSON e nell'impronta
+   del sigillo: dopo la chiusura non si può sostituire. */
+const TIMBRO_LATO = 1000;
+
+/* Porta il fondo del foglio al bianco e lascia l'inchiostro com'è. La carta
+   è il colore più diffuso: se ne misura la tinta media e ogni canale viene
+   scalato perché diventi bianco neutro, anche sotto una luce calda. Il 2%
+   più scuro resta nero, e un timbro blu resta blu. */
+function sbiancaPixel(px){
+  const isto = new Uint32Array(256);
+  const luce = i => (px[i]*77+px[i+1]*150+px[i+2]*29)>>8;
+  for(let i=0;i<px.length;i+=4) isto[luce(i)]++;
+  const totale = px.length/4;
+  let somma = 0, nero = 0, carta = 255;
+  for(let v=0; v<256; v++){ somma += isto[v]; if(somma >= totale*.02){ nero = v; break; } }
+  somma = 0;
+  for(let v=255; v>=0; v--){ somma += isto[v]; if(somma >= totale*.5){ carta = v; break; } }
+  /* foto senza contrasto (tutto fondo o tutto inchiostro): meglio non toccarla */
+  if(carta - nero < 40) return false;
+  const tinta = [0,0,0];
+  let quanti = 0;
+  for(let i=0;i<px.length;i+=4){
+    if(luce(i) < carta) continue;
+    tinta[0] += px[i]; tinta[1] += px[i+1]; tinta[2] += px[i+2]; quanti++;
+  }
+  const scala = tinta.map(t=>255/Math.max(40, t/quanti - nero));
+  for(let i=0;i<px.length;i+=4){
+    for(let c=0;c<3;c++){
+      const v = (px[i+c] - nero)*scala[c];
+      px[i+c] = v <= 0 ? 0 : (v >= 255 ? 255 : v);
+    }
+  }
+  return true;
+}
+
+let timbroFoto = null;                      /* canvas della foto, già orientata */
+let timbroSel = {x:0, y:0, w:1, h:1};       /* selezione in frazioni della foto */
+
+async function timbroApri(file){
+  if(sigillato || !file) return;
+  const modal = document.getElementById("timbroModal");
+  const stato = document.getElementById("timbroStato");
+  const usa = document.getElementById("timbroUsa");
+  modal.hidden = false; usa.disabled = true;
+  document.getElementById("timbroSel").hidden = true;
+  stato.textContent = "Preparazione della fotografia…"; stato.classList.remove("errore");
+  try{
+    const pronto = await preparaFileImmagine(file,t=>{ stato.textContent = t; });
+    let sorgente, larghezza, altezza;
+    try{
+      sorgente = await createImageBitmap(pronto,{imageOrientation:"from-image"});
+      larghezza = sorgente.width; altezza = sorgente.height;
+    }catch(err){
+      sorgente = await immagineCaricataDaFile(pronto);
+      larghezza = sorgente.naturalWidth; altezza = sorgente.naturalHeight;
+    }
+    const fattore = Math.min(1,2200/Math.max(larghezza,altezza));
+    const tela = document.createElement("canvas");
+    tela.width = Math.max(1,Math.round(larghezza*fattore));
+    tela.height = Math.max(1,Math.round(altezza*fattore));
+    const ctx = tela.getContext("2d",{alpha:false});
+    ctx.fillStyle = "#fff"; ctx.fillRect(0,0,tela.width,tela.height);
+    ctx.drawImage(sorgente,0,0,tela.width,tela.height);
+    if(typeof sorgente.close === "function") sorgente.close();
+    timbroFoto = tela;
+    timbroSel = {x:.04, y:.04, w:.92, h:.92};
+    timbroDisegna();
+    stato.textContent = "Ritaglia il timbro, o la parte alta dello scontrino con il nome dell\u2019esercizio.";
+    usa.disabled = false;
+  }catch(err){
+    timbroFoto = null;
+    stato.textContent = "Fotografia non leggibile: "+(err?.message || err);
+    stato.classList.add("errore");
+  }
+}
+
+function timbroDisegna(){
+  if(!timbroFoto) return;
+  const vista = document.getElementById("timbroVista");
+  const area = document.getElementById("timbroArea");
+  /* la foto intera deve stare nello schermo, anche in verticale sul telefono */
+  const alteMassima = Math.max(160, window.innerHeight*.56);
+  const rapporto = timbroFoto.width/timbroFoto.height;
+  area.style.maxWidth = Math.round(alteMassima*rapporto)+"px";
+  const largo = Math.min(1200, timbroFoto.width);
+  vista.width = largo; vista.height = Math.round(largo/rapporto);
+  vista.getContext("2d").drawImage(timbroFoto,0,0,vista.width,vista.height);
+  timbroPosiziona();
+}
+
+function timbroPosiziona(){
+  const sel = document.getElementById("timbroSel");
+  sel.hidden = false;
+  sel.style.left = (timbroSel.x*100)+"%"; sel.style.top = (timbroSel.y*100)+"%";
+  sel.style.width = (timbroSel.w*100)+"%"; sel.style.height = (timbroSel.h*100)+"%";
+}
+
+function timbroChiudi(){
+  document.getElementById("timbroModal").hidden = true;
+  timbroFoto = null;
+  document.getElementById("fileTimbroScatto").value = "";
+  document.getElementById("fileTimbroCarica").value = "";
+}
+
+function timbroRitaglia(){
+  const sx = Math.round(timbroSel.x*timbroFoto.width), sy = Math.round(timbroSel.y*timbroFoto.height);
+  const sw = Math.max(1,Math.round(timbroSel.w*timbroFoto.width)), sh = Math.max(1,Math.round(timbroSel.h*timbroFoto.height));
+  const fattore = Math.min(1,TIMBRO_LATO/Math.max(sw,sh));
+  const tela = document.createElement("canvas");
+  tela.width = Math.max(1,Math.round(sw*fattore)); tela.height = Math.max(1,Math.round(sh*fattore));
+  const ctx = tela.getContext("2d",{alpha:false,willReadFrequently:true});
+  ctx.fillStyle = "#fff"; ctx.fillRect(0,0,tela.width,tela.height);
+  ctx.drawImage(timbroFoto,sx,sy,sw,sh,0,0,tela.width,tela.height);
+  try{
+    const immagine = ctx.getImageData(0,0,tela.width,tela.height);
+    if(sbiancaPixel(immagine.data)) ctx.putImageData(immagine,0,0);
+  }catch(err){ /* senza accesso ai pixel il ritaglio resta comunque valido */ }
+  return tela.toDataURL("image/jpeg",.88);
+}
+
+function aggiornaTimbro(){
+  const img = dati.__timbro || "";
+  document.querySelectorAll("[data-timbro-anteprima]").forEach(box=>{
+    box.hidden = !img;
+    const anteprima = box.querySelector("img");
+    if(img) anteprima.src = img; else anteprima.removeAttribute("src");
+  });
+  document.querySelectorAll("[data-timbro-rimuovi]").forEach(b=>{ b.hidden = !img; b.disabled = sigillato; });
+  document.querySelectorAll("[data-timbro-scatta],[data-timbro-carica]").forEach(b=>{
+    b.disabled = sigillato;
+    if(b.matches("[data-timbro-scatta]")) b.textContent = img ? "Rifai foto" : "Fotografa";
+  });
+  componiAgenti();
+}
+
+/* trascinamento: dentro il riquadro lo sposta, sugli angoli lo allarga,
+   fuori ne disegna uno nuovo. Funziona con dito, penna e mouse. */
+(function(){
+  const area = document.getElementById("timbroArea");
+  if(!area) return;
+  let gesto = null;
+  const punto = e=>{
+    const r = area.getBoundingClientRect();
+    return {x:Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)), y:Math.min(1,Math.max(0,(e.clientY-r.top)/r.height))};
+  };
+  const MINIMO = .04;
+  area.addEventListener("pointerdown",e=>{
+    if(!timbroFoto) return;
+    const p = punto(e);
+    const angolo = e.target.closest("[data-angolo]")?.dataset.angolo;
+    if(angolo) gesto = {tipo:"angolo", angolo, base:{...timbroSel}};
+    else if(e.target.closest("#timbroSel")) gesto = {tipo:"sposta", da:p, base:{...timbroSel}};
+    else{ gesto = {tipo:"nuovo", da:p}; timbroSel = {x:p.x, y:p.y, w:MINIMO, h:MINIMO}; timbroPosiziona(); }
+    area.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  area.addEventListener("pointermove",e=>{
+    if(!gesto) return;
+    const p = punto(e);
+    if(gesto.tipo === "sposta"){
+      const b = gesto.base;
+      timbroSel.x = Math.min(1-b.w, Math.max(0, b.x + p.x - gesto.da.x));
+      timbroSel.y = Math.min(1-b.h, Math.max(0, b.y + p.y - gesto.da.y));
+    }else{
+      /* l'angolo opposto resta fermo */
+      let fx, fy;
+      if(gesto.tipo === "nuovo"){ fx = gesto.da.x; fy = gesto.da.y; }
+      else{
+        const b = gesto.base;
+        fx = gesto.angolo.includes("w") ? b.x+b.w : b.x;
+        fy = gesto.angolo.includes("n") ? b.y+b.h : b.y;
+      }
+      timbroSel = {
+        x:Math.min(fx,p.x), y:Math.min(fy,p.y),
+        w:Math.max(MINIMO,Math.abs(p.x-fx)), h:Math.max(MINIMO,Math.abs(p.y-fy))
+      };
+      timbroSel.x = Math.min(timbroSel.x, 1-timbroSel.w);
+      timbroSel.y = Math.min(timbroSel.y, 1-timbroSel.h);
+    }
+    timbroPosiziona();
+  });
+  const fine = ()=>{ gesto = null; };
+  area.addEventListener("pointerup",fine);
+  area.addEventListener("pointercancel",fine);
+})();
+
+["fileTimbroScatto","fileTimbroCarica"].forEach(id=>{
+  document.getElementById(id)?.addEventListener("change",e=>{
+    /* come per le foto: si prende il file prima di azzerare il campo */
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if(file) timbroApri(file);
+  });
+});
+document.getElementById("timbroRuota")?.addEventListener("click",()=>{
+  if(!timbroFoto) return;
+  const ruotata = document.createElement("canvas");
+  ruotata.width = timbroFoto.height; ruotata.height = timbroFoto.width;
+  const ctx = ruotata.getContext("2d");
+  ctx.translate(ruotata.width,0); ctx.rotate(Math.PI/2);
+  ctx.drawImage(timbroFoto,0,0);
+  timbroFoto = ruotata;
+  timbroSel = {x:.04, y:.04, w:.92, h:.92};
+  timbroDisegna();
+});
+document.getElementById("timbroTutta")?.addEventListener("click",()=>{
+  if(!timbroFoto) return;
+  timbroSel = {x:0, y:0, w:1, h:1}; timbroPosiziona();
+});
+document.getElementById("timbroChiudi")?.addEventListener("click",timbroChiudi);
+document.getElementById("timbroAnnulla")?.addEventListener("click",timbroChiudi);
+document.getElementById("timbroUsa")?.addEventListener("click",()=>{
+  if(!timbroFoto || sigillato) return;
+  dati.__timbro = timbroRitaglia();
+  timbroChiudi();
+  aggiornaTimbro(); salvaBozza(); ricalcola();
+  nota(document.getElementById("modalitaStampa")?.checked
+    ? "Timbro acquisito: compare nella versione digitale. Quella da stampare tiene la firma a penna."
+    : "Timbro della parte inserito nel verbale", true);
+});
+window.addEventListener("resize",()=>{ if(timbroFoto && !document.getElementById("timbroModal").hidden) timbroDisegna(); });
 
 /* ── allegati catastali della scheda ricettive ── */
 const ALLEGATI_CATASTALI = {
@@ -1974,6 +2292,15 @@ mcorpo.addEventListener("input",e=>{
 });
 
 mcorpo.addEventListener("click",e=>{
+  if(e.target.closest("[data-timbro-scatta]")){ if(!sigillato) document.getElementById("fileTimbroScatto")?.click(); return; }
+  if(e.target.closest("[data-timbro-carica]")){ if(!sigillato) document.getElementById("fileTimbroCarica")?.click(); return; }
+  if(e.target.closest("[data-timbro-rimuovi]")){
+    if(sigillato) return;
+    delete dati.__timbro;
+    aggiornaTimbro(); salvaBozza(); ricalcola();
+    nota("Timbro della parte rimosso",true);
+    return;
+  }
   if(e.target.closest("[data-foto-scatta]")){ document.getElementById("fileFotoScatto")?.click(); return; }
   if(e.target.closest("[data-foto-carica]")){ document.getElementById("fileFotoCarica")?.click(); return; }
   const rimuoviFoto = e.target.closest("[data-foto-rimuovi]");
@@ -2223,7 +2550,7 @@ function applica(p){
     dipingi(k);
   });
   aggiornaAllegatiCatastali();
-  componiAgenti();
+  aggiornaTimbro();
   componiFormula();
   if(typeof p.modalitaStampa === "boolean") impostaModalitaFirma(p.modalitaStampa, false);
   aggiornaConteggio();
@@ -3208,7 +3535,8 @@ document.getElementById("btnSvuota").addEventListener("click",()=>{
   }
   scartaBozza();
   delete dati.__foto;
-  costruisciElencoFoto(); costruisciPagineFoto();
+  delete dati.__timbro;
+  costruisciElencoFoto(); costruisciPagineFoto(); aggiornaTimbro();
   componiAgenti(); componiFormula(); aggiornaConteggio(); ricalcola(); nota("Scheda svuotata");
 });
 document.getElementById("btnStampa").addEventListener("click",async ()=>{
@@ -3257,6 +3585,7 @@ function chiudiModifiche(){
   mcorpo.querySelectorAll("[data-foto-didascalia],[data-foto-rimuovi],[data-foto-scatta],[data-foto-carica]")
     .forEach(el=>{ el.disabled = true; });
   mcorpo.querySelectorAll(".allegato-azioni button").forEach(el=>{ el.disabled = true; });
+  mcorpo.querySelectorAll("[data-timbro-scatta],[data-timbro-carica],[data-timbro-rimuovi]").forEach(el=>{ el.disabled = true; });
   document.querySelectorAll(".tipo-tabs button").forEach(el=>{ el.disabled = true; });
   ["btnMda","btnRicevuta","btnFotoScia","btnCarica","btnSvuota","conSopralluogo","modalitaStampa"]
     .forEach(id=>{ const el = document.getElementById(id); if(el) el.disabled = true; });
@@ -3301,6 +3630,7 @@ async function ripristinaSigillo(info,campi){
    ══════════════════════════════════════════════════════════════ */
 const CHIAVE_BOZZA = "isp_bozza_v1";
 const CHIAVE_BOZZA_FOTO = "isp_bozza_foto_v1";
+const CHIAVE_BOZZA_TIMBRO = "isp_bozza_timbro_v1";
 const CAMPI_AUTOMATICI = ["data","ora","sl_data","ch_data","cn_edotta"];
 let attesaBozza;
 
@@ -3308,7 +3638,7 @@ function bozzaCorrente(){
   const campi = {};
   let allegati = false;
   Object.keys(dati).forEach(k=>{
-    if(/^__(?:allegato_|foto$)/.test(k)){ allegati = true; return; }
+    if(/^__(?:allegato_|foto$|timbro$)/.test(k)){ allegati = true; return; }
     campi[k] = maiuscolo(dati[k]);
   });
   return {
@@ -3335,12 +3665,18 @@ function salvaBozza(){
     }catch(e){
       try{ localStorage.removeItem(CHIAVE_BOZZA_FOTO); }catch(e2){}
     }
+    try{
+      if(dati.__timbro) localStorage.setItem(CHIAVE_BOZZA_TIMBRO, dati.__timbro);
+      else localStorage.removeItem(CHIAVE_BOZZA_TIMBRO);
+    }catch(e){
+      try{ localStorage.removeItem(CHIAVE_BOZZA_TIMBRO); }catch(e2){}
+    }
   }, 700);
 }
 
 function scartaBozza(){
   clearTimeout(attesaBozza);
-  try{ localStorage.removeItem(CHIAVE_BOZZA); localStorage.removeItem(CHIAVE_BOZZA_FOTO); }catch(e){}
+  try{ localStorage.removeItem(CHIAVE_BOZZA); localStorage.removeItem(CHIAVE_BOZZA_FOTO); localStorage.removeItem(CHIAVE_BOZZA_TIMBRO); }catch(e){}
 }
 
 function riprendiBozza(){
@@ -3366,6 +3702,10 @@ function riprendiBozza(){
   let fotoRipresa = [];
   try{ fotoRipresa = JSON.parse(localStorage.getItem(CHIAVE_BOZZA_FOTO)||"[]"); }catch(e){ fotoRipresa = []; }
   if(Array.isArray(fotoRipresa) && fotoRipresa.length) b.campi.__foto = fotoRipresa;
+  try{
+    const timbroRipreso = localStorage.getItem(CHIAVE_BOZZA_TIMBRO);
+    if(timbroRipreso && /^data:image\//.test(timbroRipreso)) b.campi.__timbro = timbroRipreso;
+  }catch(e){}
   applica({tipoScheda:b.tipoScheda, campi:b.campi, modalitaStampa:b.modalitaStampa});
   const cs = document.getElementById("conSopralluogo");
   if(cs && typeof b.conSopralluogo === "boolean" && cs.checked !== b.conSopralluogo){
